@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, createContext, useContext } from "react";
-import { BookOpen, Clock, Map as MapIcon, Scroll, Wand2, Menu, ChevronRight, ChevronLeft, ExternalLink, Gem, Lock, Dices, Sparkles, Wrench, Layers, Flame, Music, Cross, Leaf, Swords, Hand, ShieldCheck, Crosshair, Eye, Skull, Puzzle, Home, Dumbbell, UserPlus, Trophy, Shapes, Globe, Cog, Wand, Star, Anvil, Heart, Ghost, Moon, Zap, Sun, Droplets, TreePine, Snowflake, CloudLightning, Flower2, Circle } from "lucide-react";
+import { BookOpen, Clock, Map as MapIcon, Scroll, Wand2, Menu, ChevronRight, ChevronLeft, ExternalLink, Gem, Lock, Dices, Sparkles, Wrench, Layers, Flame, Music, Cross, Leaf, Swords, Hand, ShieldCheck, Crosshair, Eye, Skull, Puzzle, Home, Dumbbell, UserPlus, Trophy, Shapes, Globe, Cog, Wand, Star, Anvil, Heart, Ghost, Moon, Zap, Sun, Droplets, TreePine, Snowflake, CloudLightning, Flower2, Circle, Axe } from "lucide-react";
 
 /* ============================================================================
    LOGLANDIA — MULTI-MODULE SHELL  (Codex theme, neutral palette)
@@ -16,7 +16,8 @@ const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='
    PLAYER CHARACTERS — lightweight backend
    ----------------------------------------------------------------------------
    No real accounts, just a name (per the call: only 7 trusted people use this).
-   Fill in your own Supabase project's URL + anon key below. Until you do,
+   Reads credentials from environment variables (VITE_SUPABASE_URL,
+   VITE_SUPABASE_ANON_KEY) — see .env.example. Until they're set,
    SUPABASE_READY stays false and Save/the gallery show a friendly setup notice
    instead of crashing.
 
@@ -32,9 +33,9 @@ const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='
      create policy "public insert" on characters for insert with check (true);
      create policy "public update" on characters for update using (true);
    ========================================================================== */
-const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"; // <-- fill in
-const SUPABASE_ANON_KEY = "YOUR-ANON-KEY"; // <-- fill in
-const SUPABASE_READY = !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-ANON-KEY");
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const SUPABASE_READY = !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
 
 async function supaFetch(path, opts = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -1252,7 +1253,7 @@ const CONTENT = {
   ],
 
   gods: [
-    { id: "the-death-triad", name: "The Death Triad", eyebrow: "Primary God · Primal",
+    { id: "the-death-triad", name: "The Death Triad", eyebrow: "Primary God · Unholy",
       img: "/images/death_triad.png",
       tagline: "Death is one, and it is three.",
       lore: "Death means different things to different people. To some it is the sweet lull of sleep. To others it is the reward at the end of a life worth remembering. To others still it is the promise of a power life could never hand them. To the wise it is all three at once, because a thing as vast and as constant as death was never going to wear a single face. The god of death is one, and it is three: Lachrymar, Nuradhuin, and Morosyn. Learn the names while you still have breath to spend on them. They are everyone's ending, and they mean to rule how you live as much as how you die.",
@@ -1450,7 +1451,7 @@ const CONTENT = {
       facts: [{ label: "Also Known As", text: "The Seedraiser · the Woodmother" }, { label: "Alignment", text: "Neutral Good" }, { label: "Tier", text: "1 — Lesser God" }, { label: "Type", text: "Primal (a paramental)" }, { label: "Domains", text: "Earth, Elemental, Plant" }, { label: "Portfolio", text: "Elemental earth, nature, harmony" }, { label: "Followers", text: "Titheans" }, { label: "Associations", text: "The Woodmother's Grove" }, { label: "Weapon", text: "Club or Quarterstaff" }, { label: "Pantheon", text: "The Paraprismatic Deities (Earth; Air, Fire, and Water above)" }],
       worship: { meta: [{ label: "Ritual and Sacrifice", text: "Welcome" }, { label: "Routine Prayer", text: "Welcome" }, { label: "Domain Magic", text: "Favored" }, { label: "Acts in Service", text: "Favored" }, { label: "Acts in Accordance", text: "Prized" }, { label: "The Three Givings", text: "Prized" }], paras: ["Three observances, kept together or not counted at all: a portion of worked land released back to the wild and never touched again, seed scattered where no harvest will follow it, and something tended that will not flower within the tender's lifetime. The Woodmother's Grove holds that any one of the three alone is merely good practice. All three together is worship."] },
       dmNotes: [] },
-    { id: "the-boatman", name: "The Boatman", eyebrow: "Lesser God · Primal",
+    { id: "the-boatman", name: "The Boatman", eyebrow: "Lesser God · Unholy",
       img: "/images/boatman_portrait.png",
       tagline: "Everyone meets him, and no one fears him, which is the rarest thing that can be said of a death.",
       lore: "You die, and your soul slips into the Sea of Souls, and out of the mist comes a narrow black boat and the man who poles it. He knows where you belong. Some souls go to the god who made them, some to the god they chose in life, some back into the wide grey water to begin again, and the Boatman reads which is which off you like a name off a manifest and takes you there. He does not judge and he does not linger. He simply sees each soul home. When a mortal prays for a clean passing, this is who they are praying to, and he is the one power in the whole business of dying that answers kindly and asks nothing back.",
@@ -1666,6 +1667,8 @@ const CONTENT = {
       lore: "house rules content goes here." },
     { id: "resurrection", name: "Resurrection Rules", eyebrow: "Mechanic · Death & Return", tagline: "What it costs to bring someone back.",
       lore: "resurrection rules content goes here." },
+    { id: "favoredsoul", name: "Favored Soul", eyebrow: "Homebrew Class · Divine Caster", tagline: "A caster bound by an involuntary divine bargain — the Cosmic Burden.",
+      lore: "Full class writeup: features, the level table, and two Cosmic Burden subclasses." },
   ],
 };
 
@@ -1775,18 +1778,91 @@ const CAMPAIGNS = [
 ];
 
 /* ------------------------------------------------------------- LORE PARSER */
+/* ------------------------------------------------------------- AUTOLINKING */
+/* Any entry name mentioned in prose gets an automatic hover-tooltip link to
+   its Codex page, so cross-references work without hand-writing [[links]].
+
+   Two things keep this from becoming noise:
+   - AUTOLINK_BLOCK holds names that double as ordinary words ("Elf", "Human",
+     "Scorn"). Linking every "a dwarf walked in" would be useless, so those
+     only link when written with an explicit [[link]].
+   - Each entry links at most once per block of text, on its first mention. */
+const AUTOLINK_BLOCK = new Set([
+  "Elf", "Human", "Dwarf", "Orc", "Goblin", "Kobold", "Halfling", "Changeling",
+  "Kith", "Tarnished", "Scorn", "Lana", "Duro", "Emrin", "House Rules",
+  "Resurrection Rules", "Favored Soul",
+]);
+
+/* Plurals and shorthands the prose actually uses, mapped to their entry id. */
+const AUTOLINK_ALIASES = {
+  "Tieflings": "tiefling", "Kitsunes": "kitsune", "Dragonkins": "dragonkin",
+  "Crystori": "crystori", "Primordia": "primordia", "Hanyou": "hanyou",
+  "Plumari": "plumari", "Leporin": "leporin", "Mothkin": "mothkin",
+  "Grung": "grung", "Drackal": "drakel",
+  "the Sea of Souls": "sea-of-souls-plane",
+  "Blackseal Order": "the-blackseal-order",
+  "Death Triad": "the-death-triad",
+};
+
+/* Built once: every linkable phrase, longest first so "Elemental Plane of
+   Fire" wins over a shorter partial match. */
+const AUTOLINK_ENTRIES = (() => {
+  const map = new Map();
+  Object.values(ENTRY_INDEX).forEach((e) => {
+    if (!e?.name || AUTOLINK_BLOCK.has(e.name)) return;
+    map.set(e.name, e.id);
+    // "The Boatman" should also match a bare "Boatman"
+    if (/^The /.test(e.name)) {
+      const bare = e.name.replace(/^The /, "");
+      if (!AUTOLINK_BLOCK.has(bare) && bare.length > 4) map.set(bare, e.id);
+    }
+  });
+  Object.entries(AUTOLINK_ALIASES).forEach(([phrase, id]) => {
+    if (ENTRY_INDEX[id]) map.set(phrase, id);
+  });
+  return [...map.entries()].sort((a, b) => b[0].length - a[0].length);
+})();
+
+const AUTOLINK_RE = new RegExp(
+  "\\b(" + AUTOLINK_ENTRIES.map(([p]) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b",
+  "g"
+);
+const AUTOLINK_LOOKUP = new Map(AUTOLINK_ENTRIES);
+
+/* Walks a plain-text run and wraps recognised names in LoreLink. `seen` is
+   shared across the whole parseLore call so a name links once, not ten times. */
+function autoLinkText(text, seen, keyPrefix) {
+  if (!text) return [text];
+  const out = [];
+  let last = 0, m, i = 0;
+  AUTOLINK_RE.lastIndex = 0;
+  while ((m = AUTOLINK_RE.exec(text)) !== null) {
+    const phrase = m[1];
+    const id = AUTOLINK_LOOKUP.get(phrase);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    if (m.index > last) out.push(text.slice(last, m.index));
+    out.push(<LoreLink key={`${keyPrefix}a${i++}`} linkKey={id}>{phrase}</LoreLink>);
+    last = m.index + phrase.length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 function parseLore(text) {
   const out = []; const re = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
   let last = 0, m, i = 0;
+  const seen = new Set();
   while ((m = re.exec(text)) !== null) {
-    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m.index > last) out.push(...autoLinkText(text.slice(last, m.index), seen, `p${i}`));
     const key = m[1].trim();
     const known = GLOSSARY[key] || ENTRY_INDEX[key];
     const label = (m[2] || GLOSSARY[key]?.term || ENTRY_INDEX[key]?.name || m[1]).trim();
+    if (ENTRY_INDEX[key]) seen.add(key);
     out.push(known ? <LoreLink key={`l${i++}`} linkKey={key}>{label}</LoreLink> : label);
     last = re.lastIndex;
   }
-  if (last < text.length) out.push(text.slice(last));
+  if (last < text.length) out.push(...autoLinkText(text.slice(last), seen, `t${i}`));
   return out;
 }
 
@@ -1811,8 +1887,13 @@ function TraitNote({ note }) {
 }
 
 /* --------------------------------------------------------------- LORE LINK */
+/* The id of the entry currently being displayed. Links pointing at it render
+   as plain text — a page shouldn't link to itself. */
+const LoreScopeContext = createContext(null);
+
 function LoreLink({ linkKey, children }) {
   const navigate = useContext(NavContext);
+  const scopeId = useContext(LoreScopeContext);
   const term = GLOSSARY[linkKey];
   const target = term ? null : ENTRY_INDEX[linkKey];
   const [open, setOpen] = useState(false);
@@ -1827,6 +1908,7 @@ function LoreLink({ linkKey, children }) {
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("mousedown", onDoc); };
   }, [open]);
   if (!term && !target) return <>{children}</>;
+  if (target && scopeId && target.id === scopeId) return <>{children}</>;
   const isEntry = !!target;
   const handleClick = () => {
     if (isEntry) { navigate(ENTRY_MODULE[target.id] || "wiki", { entryId: target.id }); return; }
@@ -2145,10 +2227,16 @@ function EntryArt({ src, alt }) {
   return <img className="lgl-art lgl-art-real" src={src} alt={alt} onError={() => setFailed(true)} />;
 }
 
-function EntryPage({ entry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
+function EntryPage({ entry: rawEntry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
   const [mechOpen, setMechOpen] = useState(false);
-  useEffect(() => { setMechOpen(false); }, [entry?.id]);
-  if (!entry) return <div className="lgl-empty-page">Pick an entry from the codex.</div>;
+  const { edits, updateEdit } = useContext(DevModeContext) || { edits: {} };
+  useEffect(() => { setMechOpen(false); }, [rawEntry?.id]);
+  if (!rawEntry) return <div className="lgl-empty-page">Pick an entry from the codex.</div>;
+  const entry = applyDevEdits(rawEntry, edits);
+  const saveLore = (t) => updateEdit(entry.id, (cur) => ({ ...cur, lore: t }));
+  const saveTagline = (t) => updateEdit(entry.id, (cur) => ({ ...cur, tagline: t }));
+  const saveSecH = (i, t) => updateEdit(entry.id, (cur) => ({ ...cur, sections: { ...cur.sections, [i]: { ...cur.sections?.[i], h: t } } }));
+  const saveSecP = (i, j, t) => updateEdit(entry.id, (cur) => ({ ...cur, sections: { ...cur.sections, [i]: { ...cur.sections?.[i], p: { ...cur.sections?.[i]?.p, [j]: t } } } }));
   const isRace = CONTENT.races.some((r) => r.id === entry.id);
   const hasMechanics = entry.facts?.length > 0 || entry.builtins?.length > 0 || entry.legacy?.length > 0 || (!entry.subracesElsewhere && entry.subraces?.length > 0);
 
@@ -2175,6 +2263,7 @@ function EntryPage({ entry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
   );
 
   return (
+    <LoreScopeContext.Provider value={entry.id}>
     <article className="lgl-entry">
       <header className="lgl-entry-head">
         <div className="lgl-eyebrow-row">
@@ -2183,7 +2272,7 @@ function EntryPage({ entry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
           {entry.working && <span className="lgl-badge soft">Working title</span>}
         </div>
         <h1>{entry.name}</h1>
-        {entry.tagline && <p className="lgl-tagline">{entry.tagline}</p>}
+        {entry.tagline && <DevEditable as="p" className="lgl-tagline" value={entry.tagline} onSave={saveTagline} />}
       </header>
       {!hideArt && <EntryArt src={entry.img} alt={entry.name} />}
       {!isRace && <Facts facts={entry.facts} />}
@@ -2197,13 +2286,13 @@ function EntryPage({ entry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
           )}
         </section>
       )}
-      {entry.lore && <p className="lgl-lore lgl-lore-open">{parseLore(entry.lore)}</p>}
+      {entry.lore && <DevEditable as="p" className="lgl-lore lgl-lore-open" value={entry.lore} onSave={saveLore} />}
       {entry.loreSections?.map((sec, i) => (
         <section className="lgl-loresec" key={i}>
-          {sec.h && <h2 className="lgl-loresec-h">{sec.h}</h2>}
+          {sec.h && <DevEditable as="h2" className="lgl-loresec-h" value={sec.h} onSave={(t) => saveSecH(i, t)} />}
           {sec.p.map((p, j) =>
             typeof p === "string"
-              ? <p className="lgl-lore" key={j}>{parseLore(p)}</p>
+              ? <DevEditable as="p" className="lgl-lore" key={j} value={p} onSave={(t) => saveSecP(i, j, t)} />
               : <DeathAside key={j} text={p.aside} />
           )}
         </section>
@@ -2270,6 +2359,7 @@ function EntryPage({ entry, hideLegacy, hideSubraces, hideArt, onOpenEntry }) {
       )}
       <GMFold items={entry.dmNotes?.length ? entry.dmNotes : entry.gmNotes} />
     </article>
+    </LoreScopeContext.Provider>
   );
 }
 
@@ -2477,6 +2567,7 @@ function WikiModule({ params }) {
   const [expandedSections, setExpandedSections] = useState(() => new Set());
   const [history, setHistory] = useState([]); // stack of past { selectedId, sectionView } views, for the Back button
   useEffect(() => { if (params?.entryId) { setSelectedId(params.entryId); setSectionView(null); } }, [params?.entryId]);
+  useEffect(() => { document.querySelector(".lgl-main")?.scrollTo({ top: 0, behavior: "auto" }); }, [selectedId, sectionView]);
   const entry = Object.values(CONTENT).flat().find((e) => e.id === selectedId);
   const q = query.trim().toLowerCase();
   const pushHistory = () => setHistory((h) => [...h, { selectedId, sectionView }]);
@@ -4464,7 +4555,450 @@ const MECH_HOME = "__mechhome__";
 
 /* Icons for the Mechanics landing tiles, keyed by entry id. Anything without
    an entry here falls back to the scroll. */
-const MECH_ICONS = { houserules: Scroll, resurrection: Cross, combatfatigue: Dumbbell, downtime: Home };
+const MECH_ICONS = { houserules: Scroll, resurrection: Cross, combatfatigue: Dumbbell, downtime: Home, favoredsoul: Wand2 };
+
+/* ============================================ FAVORED SOUL DATA ============ */
+/* Parsed from Logan's Favored Soul homebrew doc. Rendered by FavoredSoulPage. */
+const FAVSOUL_DATA = {
+  intro: ["Favored Souls exist somewhere between Warlocks and Paladins: they don't have the versatility that invocations grant the former, nor the pure combat ability of the latter, but what they lack in these respects they make up for by having strong focused abilities that develop as they level, and the versatility of pact magic mixed with a prepared spell list.", "The first major consideration when creating your Favored Soul character is how they came to be — a Favored Soul must be favored by some divine or deific being after all. They never come into being purely by chance, and are always an act of providence or fate. What god do they draw their power from? What plans does the god have in mind for the Favored Soul? Does that Favored Soul believe in the portfolio of that god, do they reject it and any claim that their power comes with responsibility, or do they even know where their power comes from? A Favored Soul is not like other divine casters or pact casters in that they don't owe the source of their power anything, and once they have the power it is theirs — it cannot be taken away for disobedience or for veering off their fated path.", "Second, look over the Favored Soul abilities and decide if they are one who relies more on their magical powers or on their divine strength. They are capable of being mid-range fighters and, if certain features are taken, even gain higher hit dice than other martial classes do. Through investment in their magical powers they gain more pact spell slots and the ability to split them into smaller slots as well, which can make their magic last longer."],
+  quickBuild: { intro: "When creating a Favored Soul there is likely no such thing as \"quick\" in the conceptual phase, but the actual build can be fairly straightforward. These builds assume you are devoted to your divine origins: choose Charisma as your highest ability score, followed by Constitution — these ensure you get the most out of your spells, and can concentrate on them more easily. Next, choose the acolyte or folk hero backgrounds. Finally, choose one of the following sets of 1st-level spells to know, depending on your gameplay style:", options: ["**Combat-Oriented** — *Absorb energy, igniting smite, inflict wounds,* and *valkyrie strike.* When you reach 2nd level, choose the Essence Armament option.", "**Support-Oriented** — *Bless, feather fall, heroism,* and *shield of summer.* When you reach 2nd level, choose the Essence Flight option.", "**Magic-Oriented** — *Color spray, divine favor, inflict wounds,* and *shield of summer.* When you reach 2nd level, choose the Essential Radiance option."] },
+  table: { header: ["Level", "Prof. Bonus", "Features", "Prepared", "Known", "Slots", "Slot Level"], rows: [
+    ["1st", "+2", "Cosmic Burden, Pact Magic", "2", "4", "1", "1st"],
+    ["2nd", "+2", "Divergent Essence, Purification", "2", "5", "2", "1st"],
+    ["3rd", "+2", "Fighting Style", "3", "7", "2", "2nd"],
+    ["4th", "+2", "Ability Score Improvement", "3", "8", "2", "2nd"],
+    ["5th", "+3", "Extra Attack", "4", "9", "2", "3rd"],
+    ["6th", "+3", "Burden Feature", "4", "10", "2", "3rd"],
+    ["7th", "+3", "Fighting Style Advancement", "5", "11", "2", "4th"],
+    ["8th", "+3", "Ability Score Improvement", "5", "12", "2", "4th"],
+    ["9th", "+4", "Essence Focus", "5", "14", "2", "5th"],
+    ["10th", "+4", "Burden Feature", "6", "15", "2", "5th"],
+    ["11th", "+4", "Fighting Style Advancement (2nd)", "6", "17", "3", "5th"],
+    ["12th", "+4", "Ability Score Improvement", "6", "18", "3", "5th"],
+    ["13th", "+5", "Burden Feature", "7", "19", "3", "5th"],
+    ["14th", "+5", "Essence Expansion", "7", "20", "3", "5th"],
+    ["15th", "+5", "Fighting Style Advancement (3rd)", "7", "21", "3", "5th"],
+    ["16th", "+5", "Ability Score Improvement", "7", "22", "3", "5th"],
+    ["17th", "+6", "Crown of Splendor", "8", "23", "4", "5th"],
+    ["18th", "+6", "Essence Mastery", "8", "24", "4", "5th"],
+    ["19th", "+6", "Ability Score Improvement", "8", "25", "4", "5th"],
+    ["20th", "+6", "True Divine Mantle", "8", "26", "4", "5th"]
+  ] },
+  classFeaturesPreamble: ["As a Favored Soul, you have the following class features.", "**Hit Dice:** 1d10 per Favored Soul level **Hit Points at 1st Level:** 10 + Constitution modifier **Hit Points at Higher Levels:** 1d10 (or 6) + your Constitution modifier per Favored Soul level after the 1st.", "**Armor:** Light armor, medium armor **Weapons:** Simple weapons, martial weapons **Tools:** None **Saving Throws:** Strength, Charisma **Skills:** Choose two skills from Arcana, History, Intimidation, Medicine, Persuasion, Religion, and Riding.", "**Equipment:** You start with the following equipment, in addition to the equipment granted by your background: - (a) two martial weapons: one melee and one ranged - (a) five javelins or (b) any simple melee weapon - (a) a priest's pack or (b) an explorer's pack - Chain shirt and a backpack", "Favored Souls begin at level 1 with 5d4 x 10 (120) gold pieces."],
+  classFeatures: [
+    { name: "Cosmic Burden", level: "1st-level Favored Soul feature", body: "You are granted power by the source of your divine power, known as your Cosmic Burden. Choose one during character creation: you gain the 1st-level feature(s) for that Cosmic Burden, then gain the Burden's abilities at the Favored Soul levels listed.  You should discuss with your GM at length what Burden is suitable for the character you want to create, as your very existence as a Favored Soul is contingent on this choice." },
+    { name: "Pact Magic", level: "1st-level Favored Soul feature", body: "Your soul and blood are infused with the power of a being beyond your understanding, granting you an effortless connection to magic beyond mortal means. Please see the general rules for spellcasting, and the Favored Soul spell list for the list of spells you have access to.  **Spell Slots.** The Favored Soul table shows how many pact spell slots you have to cast your Favored Soul spells of 1st through 5th level. The table shows the level of these slots. Your Favored Soul pact spell slots are all of the same level, and are used to cast your spells of 1st level or higher. You regain all expended pact spell slots when you complete a Short or Long Rest.  **Spells Known of 1st Level and Higher.** You learn spells as a Favored Soul according to the Favored Soul table, but each time you complete a Long Rest you must prepare which from among your learned spells you are capable of casting.  *Learning Spells.* At 1st level you know four 1st-level spells from the Favored Soul spell list. The Favored Soul table outlines when you learn more, which you do as you gain levels as a Favored Soul. When you learn new Favored Soul spells they must be of a level you have Favored Soul pact spell slots of a high enough level to cast. Each time you gain a level as a Favored Soul, you can switch one of your currently known Favored Soul spells for another you are capable of learning.  *Preparing Spells.* Each time you complete a Long Rest you may choose a number of Favored Soul spells that you know (as described above) as listed on the Favored Soul table. These spells are considered prepared, and you can cast them using your pact spell slots (but not regular spell slots) until the next time you prepare new Favored Soul spells. If you complete a Long Rest and choose not to prepare new spells, you retain your previously prepared ones.  **Spellcasting Ability.** Your spellcasting ability for your Favored Soul spell attacks and Favored Soul spell save DC is Charisma. Any time your Favored Soul features refer to a save DC or spell attack without clarifying how it should be calculated, they use these calculations for them as well.  **Spell Focus.** You can use a divine focus as a spellcasting focus for your Favored Soul spells, or you may use a weapon you are proficient with instead." },
+    { name: "Divergent Essence", level: "2nd-level Favored Soul feature", body: "The power of your burden becomes more resolute, and is able to be focused into a tangible form. Choose one of the following Essence Options, which you gain immediately.  **Essence Armament.** You can conjure up a weapon made of divine power — be it dark or just — that resembles and mechanically functions as the favored weapon of the deity from which your burden originates. This weapon can appear as a solid version of the weapon, or a construct made of energy as you describe it.  You can summon this weapon as a bonus action on your turn, and dispel it as a bonus action as well. If another creature attempts to make an attack using the weapon it vanishes immediately, as it does if it goes more than 100 feet away from you (or further than twice its long range, if it is a thrown weapon). If it is out of your hands you can use your reaction to dispel it or summon it back to your hands.  This weapon counts as magical, and when you attack with it you can use your Favored Soul spellcasting ability for your attack and damage rolls using it. If it requires ammunition it can create mundane (but magical) ammunition for it to use, but it still must be reloaded/loaded as it normally would be.  **Essence Flight.** You can summon a set of wings that sprout from your back (or a more abstract representation of them), granting you a flight speed equal to your proficiency bonus x 10 feet. If you already have a fly speed, it is increased by half your proficiency bonus (rounded down) x 10 feet instead.  If you are knocked prone while flying, you can use your reaction to right yourself from prone immediately without falling.  **Essential Radiance.** You have one additional pact spell slot, which functions identically to and is counted as one of your Favored Soul pact spell slots.  Furthermore, you now learn cantrips as you level as a Favored Soul: you learn a number of cantrips from the Cleric spell list (which count as Favored Soul cantrips for you) equal to the level of your Favored Soul pact spell slots. Each time you gain a level as a Favored Soul, when that number increases you gain a new cantrip this way, and each time you level as a Favored Soul at all you can switch one of your current Favored Soul cantrips for another." },
+    { name: "Purification", level: "2nd-level Favored Soul feature", body: "A number of times per Long Rest equal to half your proficiency bonus (rounded down), you can invoke the power of your divine nature to produce one of the following effects as an action; you must choose an effect which matches part of your alignment:  **Restoration (Good).** Choose one creature within 30 feet of you that you can see. A wave of positive energy washes over them, restoring hit points to them equal to 10 x the slot level of your pact spell slots.  **Destruction (Evil).** Choose one creature within 30 feet of you that you can see. That creature must succeed on a Constitution saving throw, or else a wave of destructive energy washes over them and deals damage to them equal to 2d8 x the level of your pact spell slots. This damage is necrotic, but your GM may allow a different damage type based on the origin of your Cosmic Burden.  **Righteous Declaration (Lawful).** Choose a number of creatures you can see within 60 feet of you equal to half your Favored Soul level (rounded down), at whom you declare a unified command. Each target must succeed a Wisdom saving throw or follow your command. These commands follow the rules of the *command* spell.  **Void Will (Chaos).** Choose one creature within 60 feet of you who you can see, who you attempt to break the mind of. Your target must succeed a Charisma saving throw or be stunned for 1 minute. During this time they reattempt the saving throw each time they take damage and at the end of each of their turns, ending the effect on a success.  **Holy Sanctuary (Neutral).** You are bathed in divine light, which remains for 1 minute. During this time, each time a creature attempts to target you with an attack or harmful effect they must succeed a Charisma saving throw: on a failure, they cannot target you (and the action is spent), and cannot do so again until the end of that turn. If they succeed they proceed as expected, unaffected by this protection for the remainder of that turn. This effect ends early if you fall unconscious or are incapacitated.  If you are true neutral, attackers who succeed don't become immune to the effects of Holy Sanctuary and must repeat it each time they attempt to target you as described above." },
+    { name: "Fighting Style", level: "3rd-level Favored Soul feature", body: "You adopt a Fighting Style to represent skills you specialize in. Choose one of the following options: Archery, Blessed Warrior, Dueling, Great Weapon Fighting, Interception, Protection, Superior Technique.  You cannot take a Fighting Style option more than once, even if you later get to choose again." },
+    { name: "Ability Score Improvement", level: "4th/8th/12th/16th/19th-level Favored Soul feature", body: "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can take one feat you meet the conditions for, increase one ability score of your choice by 2, or increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature." },
+    { name: "Extra Attack", level: "5th-level Favored Soul feature", body: "When you take the Attack action, you can attack twice instead of once." },
+    { name: "Fighting Style Advancement", level: "7th/11th/15th-level feature advancement", body: "Once at 7th level, then again at 11th, and 15th level each, you advance one of your Fighting Styles. If you have none to advance, you may choose a new one to gain instead from the choices presented at 3rd level." },
+    { name: "Essence Focus", level: "9th-level Favored Soul feature", body: "You focus the power of your Cosmic Burden into yet another form, as well as improve upon the first. You gain one additional Essence Option from your 2nd-level Divergent Essence feature, as well as gain one of the Essence Focus choices below for the one you previously selected. When later features grant you additional choices, you cannot pick the same one twice:  **Essence Armament** - *Devoted Critical.* You score a critical hit with your Armament Weapon on a d20 result of 19 or 20. - *Energy Surge.* Your Essence Armament deals an additional weapon die of damage. The damage is radiant or necrotic (your choice when you gain this feature), or a type deemed appropriate for the source of your Cosmic Burden by your GM. - *Soul Blade.* Your Essence Armament has an enhancement bonus equal to half your proficiency bonus (rounded down), and when you attack with it as part of an Attack action, you can make one attack with it as a bonus action. If your Essence Armament merges with another weapon with an enhancement bonus (such as through Possessed Weapon), the higher of the two is used in place of the other. - *Versatile Essence.* Your Essence Armament can be any type of weapon you are proficient with, instead of just your deity's favored weapon. Changing it after it is already conjured requires a bonus action.  **Essence Flight** - *Aura of Protected Personage.* If you are wearing no armor you can choose to calculate your armor class as 10 + your Dexterity modifier + your Charisma modifier. Furthermore, you can cast the *shield* spell a number of times per Long Rest equal to half your proficiency bonus, requiring no spell slot to do so. - *Flight Dash.* You can take the Dash action as a bonus action, but when you do so this way you only move up to half your Fly speed instead of your base movement speed. - *Uninhibited Sight.* You can see invisible creatures around you as if they were plainly visible, and can see into the Ethereal Realm from the Material Plane and vice versa. If you see a creature on one plane, you can interact with it from the other. This vision extends out to a number of feet equal to your proficiency bonus x 10.  **Essential Radiance** - *Body of the Planes.* Your maximum hit points increase by 1 for each Favored Soul level you have when gaining this benefit, then it increases by 1 again each time you gain another Favored Soul level. - *Providencial Caster.* When you make a spellcasting ability check for any of your Favored Soul spells, you may add half your proficiency bonus (rounded down) to the result. Furthermore, you may add your Charisma modifier to the result of any damage roll you make for your Favored Soul cantrips. - *Split Soul Spell.* When casting a spell using a Favored Soul pact spell slot, you can choose to create two \"minor\" pact spell slots, each of a level equal to half your proficiency bonus (rounded up). One of these slots is immediately used to cast the triggering spell, and you retain the other until you use it or you complete a Short or Long Rest. To use this feature, the spell you cast must be of a level the resulting minor pact spell slots are capable of casting. You cannot split a minor pact spell slot using this feature." },
+    { name: "Essence Expansion", level: "14th-level Favored Soul feature", body: "You gain the following bonuses for each Essence Option you have picked so far, and you gain one Essence Focus choice for each of them.  **Essence Armament: Possessed Weapon.** As a bonus action, you can now merge your Essence Armament with a regular weapon as long as it meets the following criteria: - If one has either of the light or finesse properties the other cannot have either of the heavy or two-handed properties, and vice versa. - Your armament and the weapon must both be ranged weapons or both be melee weapons. - You are proficient with both weapons.  While merged, the weapon takes on the weapon damage die that is the higher of the two, but you pick which weapon's properties are used (indicating its physical appearance). Beyond this, both weapons have all of the effects of the possessed weapon and all the benefits of your Essence Armament. However, if you dispel your Armament they cease being merged, as do they if you complete a Short or Long Rest.  If you merge your Essence Armament with your deity's favored weapon, the first attack you make with it each turn has advantage.  **Essence Flight: Divine Skirmisher.** You do not provoke opportunity attacks from creatures if you both entered and exited their reach on the same turn.  **Essential Radiance: Empowered Pact.** When you cast a spell using a pact spell slot, you can treat its slot level as if it was equal to half your Favored Soul level (rounded down, maximum 9th). You can do so twice per Long Rest." },
+    { name: "Crown of Splendor", level: "17th-level Favored Soul feature", body: "You gain proficiency in one saving throw of your choice that you don't already have." },
+    { name: "Essence Mastery", level: "18th-level Favored Soul feature", body: "You gain the Essence Option you have not previously gained, and can choose one additional Essence Focus choice for each of the ones you already have." },
+    { name: "True Divine Mantle", level: "20th-level Favored Soul feature", body: "The divine power within you breaches the boundary between mortals and the divine, granting you superhuman attributes. You gain the following benefits: - When you take the Attack action you may attack three times instead of once. - When you are reduced to 0 hit points and begin dying, you suffer no penalties to your movement, do not fall prone, can still concentrate on spells, and you can still take an action or bonus action on your turn (but not both). - Any time you make an ability check or saving throw that does not already add your proficiency bonus, you may add half your proficiency bonus (rounded down) to the result. - You gain an extra pact spell slot that functions identically to your usual Favored Soul pact spell slots, except that it is a 9th-level slot and is only regained when you complete a Long Rest. Features that calculate their effects based on your pact spell slots (such as Purification) recognize this slot as your highest level spell slot." }
+  ],
+  cosmicBurdens: { intro: "A Favored Soul's power comes from the deific being that they carry a part of. Their burden may be the result of being born from such a being and a mortal, by being born to prophecy or providence as the agent of a greater being's will, or being chosen by such a being to be vested with a fragment of their divine might. Whatever the source, a Favored Soul has a direct connection to the power of a deity, and an undeniable purpose to serve in the grand scheme of things. This power is their Cosmic Burden.", items: [
+    { name: "Burtromet", desc: "Driven by a need to forge and create, this fiery warrior can conjure up javelins of flame, and unleash huge waves of fire and destruction on their enemies." },
+    { name: "Ilsrabae", desc: "Able to survive below the sea, those granted power by Ilsrabae can conjure freezing waters to attack others, are able to survive when breathing water, and generate a veil of cold energy to protect themselves." },
+    { name: "Invidiva", desc: "An assassin-like fighter who seeks to exploit openings left by their opponents, much as a Rogue would. They are highly capable when striking with weapons that can overwhelm opponents, and gain improved speed." },
+    { name: "Ivsil", desc: "Wearing a roaring gale as a protective charm, this Favored Soul has power over the wind around them. They act quickly and without hesitation in combat, and are able to pull their opponents into the air by inverting gravity." },
+    { name: "Lussuria", desc: "Raised as a plaything and a trophy to be admired, this Favored Soul bends others to their will with charm and psychic force, and is likely to be a mortal child of Lussuria or one of her followers." },
+    { name: "Malveth", desc: "The beneficiary of the protections afforded by the undead — this subclass can survive killing blows as though they were undead, is a master of necromancy, and can steal vitality from their enemies." },
+    { name: "Mortuous", desc: "Raised as an entertaining combatant for the Challenger, this Favored Soul bears the scales of Mortuous' dragonkin flesh, punishes distracted foes, and grows in raw durability and ferocity as they fight." },
+    { name: "Scorn", desc: "Marked by a bloody, whispering compulsion to kill, this Favored Soul fights with claws of necrotic energy and feeds on violence, healing from the carnage they cause." },
+    { name: "Tithiss", desc: "Attuned to the forces of life, this Favored Soul yearns to ease pain and spread relief, mending allies, growing forests from nothing, and resisting the acid that flows through Tithiss' own domain." },
+    { name: "Vaeloria", desc: "This avatar of the moon can summon a celestial rabbit familiar to aid them in combat; they can also move quickly, see through darkness of all kinds, and conjure radiant moonlight to weaken others." },
+    { name: "Vestias", desc: "Keeper of the eidomantic web and burdened with a reverence for magic, this Favored Soul resists spells, channels a wider well of sorcery, and casts with unusual speed and ease." }
+  ] },
+  burdenMalveth: {
+  favoredWeapon: "Greatscythe",
+  renamedNote: null,
+  intro: ["Favored soul choosing a favored soul is paramount to assigning a true representative for himself in the Material Plane. The Court of Decay knows to watch for them and take them into their ranks as their chosen leader, even above the equerries of the court. The burden they carry is to lead Malveth's followers to spread undeath in the world — a path they may not be keen to follow."],
+  features: [
+    { name: "Malveth's Compulsion", level: null, body: "Malveth's influence demands a respect for perpetuity and patience, granting you aspects like an undead being. Any spell or effect that interacts with an undead creature differently (including spells that detect them, and spells that can or cannot target them) treat you as an undead, and ignore your other creature types." },
+    { name: "Master of Necromancy", level: "1st-level Burden of Malveth Feature", body: "Inherited from Malveth's domain, you are a master of necromancy. You can treat all necromancy spells, as well as spells from the Unbound Moralisms spell group, as if they were on the favored soul spell list, allowing you to learn and cast them.  You have one extra pact spell slot that is the same level as those listed on the favored soul table and acts the same way — this special spell slot can only be used to cast spells of the necromancy school, however." },
+    { name: "Uncanny Body", level: "1st-level Burden of Malveth Feature", body: "You are proficient in Constitution saving throws and are resistant to necrotic damage." },
+    { name: "Deathly Fortitude", level: "6th-level Burden of Malveth Feature", body: "Malveth's influence grants you the durability of a risen undead: if damage reduces you to 0 hit points, you must make a Constitution saving throw with a DC of 5 + the damage taken, unless the damage is radiant or from a critical hit. On a success you drop to 1 hit point instead.  Each time you avoid being reduced to 0 hit points this way, the DC increases by 2 until you complete a Short or Long Rest." },
+    { name: "Gluttonous Infliction", level: "10th-level Burden of Malveth Feature", body: "In place of a weapon attack you can spend a use of Purification to cast *inflict wounds* on a creature within range (requiring no spell slot), as if it was cast using one of your pact spell slots. You need not have learned or prepared the spell to do so. On a hit, you can choose to either regain hit points equal to the damage you deal, or gain the same amount in temporary hit points.  If you miss with *inflict wounds*, your use of Purification is regained at the end of your turn." },
+    { name: "Animate Menials", level: "13th-level Burden of Malveth Feature", body: "Once per Long Rest, you can conjure 1d4+2 Decaying Menials, each of them appearing in an unoccupied space you choose within 30 feet of you. The menials roll initiative collectively, all taking their turn on the same initiative count, and all of the menials have a joint hit point pool of 15 x the number of menials summoned. They share these hit points, and if one dies from damage they all die immediately. They cannot regain lost hit points.  These menials share your proficiency bonus for their saving throws, and the save DC for their Nightmare Visage is equal to your spell save DC. They also use your spell attack bonus for their Rake attacks.  Your summoned menials will obey your commands, taking whatever actions are available to them on their turn. However, if a menial begins its turn further than 30 feet away from you it will move toward you to get within that range, and if they cannot they will take the Dodge action after making their best effort to do so. If given no commands, they will move back within 30 feet of you and do their best to defend themselves, including attacking creatures hostile to you.  Once summoned, these menials die after 10 minutes.  ---" }
+  ],
+},
+  burdenVaeloria: {
+  favoredWeapon: "Combat Scythe",
+  renamedNote: null,
+  intro: ["The caring embrace of Vaeloria protects those led astray in the darkness, and her burden falls unto her favored in the form of a duty to protect those who are lost. Her Favored Souls are charged with braving the darkness to aid the downtrodden and wayward. Her power manifests in the creation of soothing moonlight, eyes that pierce the darkness, and the ability to vanish like a shadow hidden in Somnus Domina's shadow."],
+  features: [
+    { name: "Moon Rabbit Familiar", level: "1st-level Burden of Vaeloria Feature", body: "Once per Long Rest, you can cast *find familiar* at a spell level equal to your pact spell slot level (requiring no spell slot) to summon a moon rabbit familiar. This familiar uses the Moon Rabbit Familiar stat block, but otherwise runs by the regular rules for a familiar summoned by this spell.  This familiar is capable of using its Moonlight Missile to attack on its turn, and a moon rabbit summoned this way adds your pact spell slot level to all of its saving throws.", statblock: { name: "Moon Rabbit Familiar", type: "Tiny celestial, lawful good", ac: "Equal to its master's spell save DC", hp: "5 plus (5 x the level of the spell slot used to summon it)", speed: "30 ft., climb 30 ft.", abilities: ["STR 10 (–)", "DEX 16 (+3)", "CON 10 (–)", "INT 7 (–2)", "WIS 14 (+2)", "CHA 10 (–)"], senses: "darkvision 60 ft., passive Perception 12", languages: "understands the languages of its summoner, but doesn't speak", traits: [{ name: "Magic Resistance", desc: "The moon rabbit has advantage on saving throws against magical effects." }, { name: "Protective Bond", desc: "Any creature occupying the same space as the moon rabbit shares its Magic Resistance trait." }, { name: "Ride-Along", desc: "The moon rabbit can move into the same space as a willing Medium or larger creature with 5 feet of it, ending its movement by magically riding atop the creature. Until it spends 5 feet of movement to move to an adjacent space, it occupies that space, cannot be targeted by attacks or effects, and moves with them when they do." }], actions: [{ name: "Moonlight Missile", desc: "Ranged Spell Attack: + the summoner's spell attack bonus, range 10 feet, one target. *Hit:* radiant damage equal to 1d8 plus the slot level used to summon it." }], bonus: [{ name: "Dash", desc: "The rabbit takes the Dash action." }], reactions: [{ name: "Crystal Moonlight Shield", desc: "When a creature within 20 feet of the moon rabbit is targeted by a weapon attack, the moon rabbit can teleport to their side and project a shimmering crystal membrane that increases the creature's armor class by the level of the spell slot used to summon them, and this increase lasts until the end of the turn (including against the triggering attack). If any attack hits the target regardless of this effect, the membrane shatters and the effect ends." }] } },
+    { name: "Rabbit's Haste", level: "1st-level Burden of Vaeloria Feature", body: "You have the speed of a defy rabbit: you can take the Dash action as a bonus action, and when you make a High Jump or Long Jump, the distance of each is increased by 10 feet (5 feet if done without movement beforehand to make a full jump)." },
+    { name: "Bright Eyes in the Darkness", level: "6th-level Burden of Vaeloria Feature", body: "You are able to see normally in darkness and dim light (magical or otherwise) up to a distance equal to 20 feet x your proficiency bonus. Furthermore, you have Expertise in the Perception skill." },
+    { name: "Circle of Radiant Moonlight", level: "10th-level Burden of Vaeloria Feature", body: "As an action you can create a 40-foot-radius sphere of bright moonlight centered on yourself by spending a use of Purification. This moonlight penetrates any magical or otherwise darkness within this space — fully illuminating it — and the sphere follows you as you move.  When the sphere appears you can force any number of creatures you choose within it to make a Constitution saving throw, taking radiant damage equal to 1d10 x your pact spell slot level on a failure, or half as much damage on a successful save. On subsequent turns you can use your bonus action to choose one creature within the sphere to target with the same save and damage. When targeting only one creature, if they fail they are blinded until the start of your next turn." },
+    { name: "New Moon Shade", level: "13th-level Burden of Vaeloria Feature", body: "When you are in darkness or dim light, you can use your bonus action to turn invisible until the end of your turn, or until you step into bright light.  Furthermore, you can produce the effects of *greater invisibility* once per Short or Long Rest, requiring no spell slot. This is not treated as a spell or magical effect." }
+  ],
+},
+  burdenInvidiva: {
+  favoredWeapon: "Bladed chain",
+  intro: ["Thieves and assassins followed Invidiva, one half of the Twin Temptations. Her nature is to seize control of what others have, and this extends to her favored. A Favored Soul of Invidiva is expected to work as an assassin of the highest order, and whether they walk this path or not, they will find themselves taking to the shadows as if it was second nature."],
+  features: [
+    { name: "Cunning Action", level: "1st-level Burden of Invidiva Feature", body: "As a bonus action you can take the Dash, Hide or Disengage action." },
+    { name: "Skills of the Grasping Twin", level: "1st-level Burden of Invidiva Feature", body: "You have Expertise in the Stealth skill.\n\nWhen you hit a creature with an attack you have advantage on, you deal an additional d6 of acid damage to your target by generating a magical corrosive sap as you strike. This only applies to attacks with weapons with the light or finesse properties." },
+    { name: "Expert Duelist", level: "6th-level Burden of Invidiva Feature", body: "You gain the Dueling Fighting Style. If you already have it you advance it instead." },
+    { name: "Twin Strike", level: "6th-level Burden of Invidiva Feature", body: "When you attack a creature with a weapon that has the secondary property, you can make that weapon's second attack as part of an Attack action instead of as a bonus action (requiring you attack with it at least once beforehand). The secondary attack can use whichever ability score would normally work with the weapon's primary attack." },
+    { name: "Total Elimination", level: "10th-level Burden of Invidiva Feature", body: "As an action, you can spend a use of Purification to become invisible for 1 minute. During this minute you make no sound when you move and leave no physical tracks. Furthermore, while invisible this way, you score a critical hit on a d20 result of 19 or 20 when wielding a weapon with the light or finesse property.\n\nWhen you score a critical hit while invisible, you can choose to end this effect early to deal damage in addition to the critical damage of your weapon's type, equal to 2d10 x your pact spell slot level. This damage is not multiplied by your critical hit." },
+    { name: "Increased Agility", level: "13th-level Burden of Invidiva Feature", body: "Your base movement speed increases by 10 feet." }
+  ],
+  },
+  burdenIvsil: {
+  favoredWeapon: "Scimitar",
+  intro: ["The will of the Blood Wind is difficult to interpret, but the storm it embodies leaves their favored wracked with a sense of displacement — they do not feel they are where they should be, and are prone to uprooting themselves. Ivsil's Favored Souls compulsively seek to escape their surroundings and rebel against that which holds them down."],
+  features: [
+    { name: "Tempestuous Essence", level: "1st-level Burden of Ivsil Feature", body: "When you take the Essence Armament, Essence Flight or Essential Radiance options at 2nd-level or higher, you gain the following traits for the corresponding option:",
+      subs: [
+        { name: "Ivsil's Billowing Shroud", tag: "Essential Radiance", body: "You can cast Ilsrabae's veil once per Short or Long Rest (requiring no spell slot) at a level equal to your pact spell slots level. When you do, it takes the form of feathers sprouting from your body and a chaotic wind surrounding you. It grants you immunity to thunder damage instead of resistance to cold damage, deals thunder damage instead of cold, and causes ranged attacks made against you to have disadvantage." },
+        { name: "Hurricane Strike", tag: "Essence Armament", body: "Your Essence Armament can deal thunder damage instead of its normal damage type, and regardless of if this is the case, it deals additional thunder damage equal to your proficiency bonus." },
+        { name: "Wings of the Storm", tag: "Essence Flight", body: "The flight speed granted by your Essence Flight is increased by 5 feet x your proficiency bonus." }
+      ] },
+    { name: "Thunderous Resistance", level: "1st-level Burden of Ivsil Feature", body: "You are resistant to thunder damage." },
+    { name: "Whirlwind Shunt", level: "6th-level Burden of Ivsil Feature", body: "As an action you can generate a gust of wind in one of two shapes:\n- A 15-foot cone originating from you.\n- A 15-foot cube centered on you.\n\nEach creature within range (except you) must make a Strength saving throw, being pushed 5 feet away from you and falling prone on a failure." },
+    { name: "Thunder of Still Air", level: "10th-level Burden of Ivsil Feature", body: "As an action you can spend one use of Purification to cast reverse gravity, requiring no spell slot. You can choose to be unaffected by the spell when you do." },
+    { name: "Initiative Surge", level: "13th-level Burden of Ivsil Feature", body: "Your instincts perk up in moments of danger, accompanied by a surge of adrenaline and focus. You cannot be surprised in combat, and have advantage on initiative checks. All attacks made against you before you take your first turn in combat have disadvantage." }
+  ],
+  },
+  burdenLussuria: {
+  favoredWeapon: "Glaive",
+  intro: ["Lussuria sees her favored as a plaything to be toyed with and controlled; they are an extension of her, and so fills their mind with thoughts of bending others to their will, surrounding themselves with suitors capable of beautiful affection, and being lavished with attention. She speaks to her Favored Souls as though they are deserving of the world, only to raise their value as a trophy only she can truly possess. Her Favored Souls are likely to be (mostly) mortal children born to her or her followers."],
+  features: [
+    { name: "Entrapping Charm", level: "1st-level Burden of Lussuria Feature", body: "Once per Short/Long Rest, you can cast charm person at the level of your pact spell slots, but requiring no spell slot. If you cast charm person this way and any of your targets are immune to being charmed, you become aware of it and may choose to have them be stunned for the spell's duration instead. If stunned this way, a creature repeats their Charisma saving throw at the end of each of their turns and each time they take damage. Succeeding the save ends the effect." },
+    { name: "Malicious Pleading", level: "6th-level Burden of Lussuria Feature", body: "When you are targeted by a weapon attack you can see, you can use your reaction to fill your attacker's mind with guilt and hesitation. They must attempt a Charisma saving throw. On a failure they do not attack you, and cannot do so for the remainder of the turn." },
+    { name: "Wave of Subjugative Will", level: "10th-level Burden of Lussuria Feature", body: "As an action, you can spend a use of Purification to target any creatures you can see within 30 feet of you with a wave of overwhelming psychic power. Each target must attempt a Charisma saving throw, and each that fails takes psychic damage equal to 2d6 x your pact spell slot level.\n\nFurthermore, creatures who fail must use their reaction to move up to their movement speed into an unoccupied space you can see, which you choose. If this movement would cause them to move into dangerous ground that could hurt them or into the way of obvious danger, they seize up and their movement speed is reduced to 0 until the end of the turn." },
+    { name: "Compelling Allure", level: "13th-level Burden of Lussuria Feature", body: "When you make any Charisma-based ability check or saving throw and roll a d20 result of 9 or lower, you can treat the result as 10 instead." }
+  ],
+  },
+  burdenTithiss: {
+  favoredWeapon: "Club, quarterstaff",
+  intro: ["Attuned to the forces of life around them, the Favored Soul of Tithiss yearns to ease the pain of all creatures and living beings around them. They are bound by their desire to spread relief."],
+  features: [
+    { name: "Acid Resistance", level: "1st-level Burden of Tithiss Feature", body: "You are resistant to acid damage." },
+    { name: "Oaken Essence", level: "1st-level Burden of Tithiss Feature", body: "When you take the Essence Armament, Essence Flight or Essential Radiance options at 2nd-level or higher, you gain the following traits for the corresponding option:",
+      subs: [
+        { name: "Sapblooded Strike", tag: "Essence Armament", body: "Your Essence Armament can do acid damage instead of its normal damage type, and regardless of if this is the case, it deals additional acid damage equal to your proficiency bonus." },
+        { name: "Tithiss' Husk", tag: "Essential Radiance", body: "You can cast Ilsrabae's veil once per Short or Long Rest (requiring no spell slot), at a level equal to your pact spell slot level. When you do, your skin becomes wooden and hard, granting you immunity to acid damage instead of resistance to cold damage, and the spell deals acid damage instead of cold damage.\n\nFurthermore, while the spell is in effect you reduce all piercing, slashing, and bludgeoning damage you take by an amount equal to half your Favored Soul level (rounded down)." },
+        { name: "Tree Walker", tag: "Essence Flight", body: "At the start of each of your turns, you can spend 15 feet of your movement speed to break apart into dirt and stone, and reappear by emerging from a tree you can see within a distance equal to 10 feet x your proficiency bonus, which must be at least as large as you. You exit into an unoccupied space surrounding that tree." }
+      ] },
+    { name: "Nurturing Arcanist", level: "6th-level Burden of Tithiss Feature", body: "When you cast a spell using a spell slot that targets a single ally, that ally regains hit points equal to half your Favored Soul level (rounded down). When you target multiple at once, they regain hit points equal to the pact spell slot level used to cast the spell instead." },
+    { name: "Emergent Forestation", level: "10th-level Burden of Tithiss Feature", body: "As an action you can spend a use of Purification to fill a 30-foot-radius sphere centered on you with growth and vegetation, including three Large 30-foot-tall trees that you choose the positions of. When you use this feature, you also regain hit points equal to 1d8 x your pact spell slot level.\n\nCreatures other than you treat this as difficult terrain, and if any other creature ends its turn within this radius they must succeed a Strength saving throw or be restrained by vines and brambles that hold them in place.\n\nCreatures that are restrained this way take 2d6 acid damage at the start of their turn, and can attempt to break free by succeeding a Strength check as an action against your spell save DC, or by dealing 10 or more damage to the vines holding them in one turn (they have AC equal to your spell save DC, are vulnerable to fire and slashing damage, and resistant to all other damage types).\n\nThis area remains for up to 1 minute, during which time you must concentrate on it as if it was a spell." },
+    { name: "Lifelight", level: "13th-level Burden of Tithiss Feature", body: "You can restore the health of others by applying pure magical energy to them — by spending a pact spell slot as an action, you can restore hit points to a creature you can touch by 2d6 x the level of the pact spell slot used. That creature is also cured of any effect that could be removed by lesser restoration." }
+  ],
+  },
+  burdenVestias: {
+  favoredWeapon: "Spear, quarterstaff, whip",
+  intro: ["Vestias' burden is tied to the dangers of magic, and her Favored Soul inherits her domination of sorcery. As the keeper of the eidomantic web, her favored can resist the power of spells and eidomantic radiation, conjure a greater supply of magical energy, and produce the effects of spells more easily than others. They are burdened with a reverence for magic that directs them to protect its use, rebelling against both those who misuse it and those who seek to stifle it."],
+  features: [
+    { name: "Eidolons' Favored", level: "1st-level Burden of Vestias Feature", body: "As the Favored Soul of an eidolic deity, you have advantage on eidomancy burn checks, and all of your attacks are both magical and eidolic." },
+    { name: "Sky-Keeper's High Sorcery", level: "1st-level Burden of Vestias Feature", body: "As the Favored Soul of Vestias, you can treat spells on the Sorcerer spell list and the Sky-Keeper's Arcana spell group as if they were on the Favored Soul spell list, allowing you to learn and cast them." },
+    { name: "Quickcast", level: "6th-level Burden of Vestias Feature", body: "When you take the Attack action, you can use your bonus action to cast a Favored Soul spell that would normally take 1 action. The spell you cast this way is treated as if cast at its base level, even if the spell slot you use to do so is higher." },
+    { name: "Anti-Magic Aegis", level: "10th-level Burden of Vestias Feature", body: "As an action you can spend a use of Purification to create a barrier around yourself that renders outside magic ineffectual for 1 minute. During this minute, you are immune to the effects of spells of a spell level equal to or lower than half your Favored Soul level (rounded down) minus 1, unless you choose to be affected by them.\n\nSpells originating from deities and artifacts can bypass this effect, but damage from their spells is still reduced to half (rounded down) and you have advantage on all ability checks and saving throws made against them." },
+    { name: "Boon of Sorcery's Might", level: "13th-level Burden of Vestias Feature", body: "You have an additional pact spell slot that functions identically to your Favored Soul pact spell slots, and is of a slot level indicated on the Favored Soul table." }
+  ],
+  },
+  burdenBurtromet: {
+  favoredWeapon: "Greathammer",
+  intro: ["Burtromet, one of the paraprismatic deities of the Elemental Planes, lays the burden of unquenchable flames upon their favored. Those who inherit this power feel a desire to spread flames in the world, to melt and reform metal into new and dangerous implements of war, and to achieve greater levels of destructive power."],
+  features: [
+    { name: "Charred Essence", level: "1st-level Burden of Burtromet Feature", body: "When you take the Essence Armament, Essence Flight, or Essential Radiance options at 2nd-level or higher, you gain the following traits for the corresponding option:",
+      subs: [
+        { name: "Burtromet's Mantle", tag: "Essential Radiance", body: "You can cast Ilsrabae's veil once per Short or Long Rest (requiring no spell slot) at a level equal to your pact spell slot level. When you do, it takes the form of a burning shroud of white-hot flames, grants immunity to fire damage instead of resistance to cold damage, and deals fire damage instead of cold damage." },
+        { name: "Forged in Flame", tag: "Essence Armament", body: "Your Essence Armament can do fire damage instead of its normal damage type, and regardless of if this is the case it deals additional fire damage equal to your proficiency bonus." },
+        { name: "Shield of Ashen Defiance", tag: "Essence Flight", body: "When you take the Dodge action, you summon a burning shield of fire surrounding you that harms attackers. Creatures that hit you with weapon attacks from within 5 feet of you while you are Dodging take 1d6 fire damage." }
+      ] },
+    { name: "Fiery Resistance", level: "1st-level Burden of Burtromet Feature", body: "You are resistant to fire damage." },
+    { name: "Meteoric Javelin", level: "6th-level Burden of Burtromet Feature", body: "When you take the Attack action, you can replace any weapon attack you make with creating a burning javelin made of flame, which you can hurl at a target you can see within 60 feet as a ranged spell attack. On a hit, these javelins each deal fire damage equal to 2d6 plus your spellcasting ability modifier.\n\nIf you hit a target with two or more of these javelins in the same turn, the target is ignited (as per the condition)." },
+    { name: "Hammer of Cracking Kilns", level: "10th-level Burden of Burtromet Feature", body: "Once per turn, when you hit a creature with a melee weapon attack, you can spend one use of Purification to enhance the attack with an overwhelming explosion of heat and force. Your target must succeed a Dexterity saving throw or take fire damage equal to 2d10 x your pact spell slot level. On a success, they take half damage and you can choose to have the fires burst outward, forcing all creatures (except you) in a 20-foot radius centered on your target to make the same Dexterity saving throw. Any creature that fails shares the initial target's damage.\n\nFinally, any creature who fails either save is ignited (as per the condition), taking 2d8 fire damage instead of a d10." },
+    { name: "Extra Attack Improvement", level: "13th-level Burden of Burtromet Feature", body: "When you take the Attack action you can attack three times instead of once. When you reach 20th level as a Favored Soul you can attack four times instead." }
+  ],
+  },
+  burdenIlsrabae: {
+  favoredWeapon: "Trident",
+  intro: ["Ilsrabae beckons her favored to join her beneath the waves, pulling them toward the freezing waters in which she makes her home. She would use her Favored Soul as an agent to spy upon those who walk on land, and to collect tributes to throw to her in the waves below. Her sweet voice whispers of their responsibility to her in their sleep, demanding affection and loyalty."],
+  features: [
+    { name: "Shivering Resistance", level: "1st-level Burden of Ilsrabae Feature", body: "You are resistant to cold damage." },
+    { name: "Sunken Essence", level: "1st-level Burden of Ilsrabae Feature", body: "When you take the Essence Armament, Essence Flight, or Essential Radiance options at 2nd-level or higher, you gain the following traits for the corresponding option:",
+      subs: [
+        { name: "Aquatic Versatility", tag: "Essence Flight", body: "You can breathe both water and air, and when submerged in liquid you can treat your fly speed as a swim speed." },
+        { name: "Ilsrabae's Regalia", tag: "Essential Radiance", body: "You can cast Ilsrabae's veil once per Short or Long Rest (requiring no spell slot) at a level equal to your pact spell slot level. When you do it takes the form of an exquisite dress or robe of icy silk, grants you immunity to cold damage, and gives disadvantage to melee attacks made against you." },
+        { name: "Stygian Edge", tag: "Essence Armament", body: "Your Essence Armament can do cold damage instead of its normal damage type, and regardless of if this is the case, it deals additional cold damage equal to your proficiency bonus." }
+      ] },
+    { name: "Secret Hoarder", level: "6th-level Burden of Ilsrabae Feature", body: "Ilsrabae grants you eyes that see through the unknown: you can read all forms of writing and understand it as though you understood the language, as long as it is not written in code or nonsensical patterns. This includes spell scrolls and magical writing, allowing you to cast written spells on scrolls and similar items as though their contents were on the Favored Soul spell list.\n\nFurthermore, you can cast see invisibility once per Short or Long Rest as though using a pact spell slot, but requiring no spell slot or components." },
+    { name: "Tundral Hurricane", level: "10th-level Burden of Ilsrabae Feature", body: "As an action you can spend a use of Purification to conjure up a raging whirlpool of freezing water that spirals around you, targeting each creature you choose within 40 feet of yourself. Each target must succeed a Strength saving throw or take magical bludgeoning damage equal to 1d8 x your pact spell slot level and be restrained as the ice freezes around them. Creatures who succeed take half as much damage and aren't restrained.\n\nCreatures restrained this way can escape by using an action to make a Strength check against your spell save DC, breaking free on a success. Dealing 10 or more damage to the ice in one attack also destroys the ice in that space; the ice has AC equal to your spell save DC, is resistant to nonmagical piercing and slashing damage, and is vulnerable to fire and bludgeoning damage. At the start of each restrained creature's turn they take 2d6 cold damage.\n\nIf this feature is used in range of creatures submerged in liquid, it must target any fully submerged creature, and such creatures have disadvantage on their saving throw against it.\n\nThe spaces that creatures are frozen in and those adjacent to them are coated in ice for 10 minutes, and are difficult terrain." },
+    { name: "Veil of the Empress", level: "13th-level Burden of Ilsrabae Feature", body: "You are permanently wreathed in a veil of ice which makes it hard for others to approach you. Creatures who hit you with melee weapon attacks from within 5 feet of you take cold damage equal to half your Favored Soul level (rounded down). Creatures grappling you or who you are grappling also take this damage at the start of your turn.\n\nConsequently, you are vulnerable to fire damage." }
+  ],
+  },
+  burdenMortuous: {
+  favoredWeapon: "Lance, gunlance",
+  intro: ["The Challenger seeks entertainment by combat, and so treats their Favored Souls as a means to raise an entertaining combatant. They fill their Favored Soul's head with thoughts of competition, strength, and glory — all for the purpose of one day bringing them to their side to explore the limits of their divine strength. As the Favored Soul grows stronger, their body bears the scales of Mortuous' dragonkin flesh."],
+  features: [
+    { name: "Focus Fighter", level: "1st-level Burden of Mortuous Feature", body: "You are capable of punishing opponents who turn their attention from you: when a creature within range of a melee weapon you are wielding makes an attack against a creature other than you, you can use your reaction to make an opportunity attack against them.\n\nWhen you hit with an opportunity attack, you roll one more of your weapon's damage dice and add it to your damage result." },
+    { name: "Challenger's Body", level: "6th-level Burden of Mortuous Feature", body: "Your maximum hit points increase by twice your Favored Soul level, and each time you gain a level as a Favored Soul they again increase by 2." },
+    { name: "Surging Champion", level: "10th-level Burden of Mortuous Feature", body: "On your turn, as long as you aren't incapacitated, you can spend a use of Purification to take an additional Attack action, and all attacks made as part of it have advantage.\n\nWhen you end your turn, roll your weapon damage for each time you would have missed an attack as part of that extra action — you gain the combined result as temporary hit points.\n\nYou can only use this feature once per turn." },
+    { name: "Extra Attack Improvement", level: "13th-level Burden of Mortuous Feature", body: "When you take the Attack action you can attack three times instead of once. When you reach 20th level as a Favored Soul you can attack four times instead of once." }
+  ],
+  },
+  burdenScorn: {
+  favoredWeapon: "Maul",
+  intro: ["The favored of Scorn must live with its bloody desires whispering in their ears at all times, compelling them to kill and slaughter. Scorn is a being only concerned with death and mayhem, which maps an unfortunate fate for those who inherit its blessing."],
+  features: [
+    { name: "Scorn's Murderous Fury", level: null, body: "Those who are the favored of Scorn might suffer from a compulsion to attack those who lay defenseless. If they suffer from this curse, a Favored Soul of Scorn that starts their turn within movement range of a creature at 0 hit points must make a DC 15 Wisdom saving throw. On a failure they are compelled to move toward that creature and make at least one Bestial Clawing attack against them before taking other actions." },
+    { name: "Bestial Clawing", level: "1st-level Burden of Scorn Feature", body: "You immediately gain the Essence Armament option from your 2nd-level Essence Armament feature (when you reach that level, this is considered to be your choice). This weapon can either be your favored weapon or can be a minor bestial transformation, wherein your limbs become clawed and horrific.\n\nThese claws also count as your favored weapon, can use your Strength or spellcasting ability for its attack and damage rolls, can be treated as a martial weapon by features and effects, and deal 1d8 slashing or necrotic damage on a successful hit (your choice).\n\nYou can \"throw\" this weapon as if it had the thrown (20/60 feet) property, which takes the form of you clawing the air and a gouge of necrotic energy slashing the space your target is in.\n\nWhen you make one attack with this weapon, you can use your bonus action to make an additional one with it." },
+    { name: "Obscene Critical", level: "1st-level Burden of Scorn Feature", body: "You score a critical hit on an attack roll result of 19 or 20. When you score a critical hit using a weapon, you regain hit points equal to half the damage you deal (rounded down).\n\nYou do not gain these benefits against a target who is an undead, construct, or lacks blood." },
+    { name: "Return from Death", level: "6th-level Burden of Scorn Feature", body: "When you roll death saving throws, you regain hit points on a d20 result of 19 or 20 instead of only 20. Furthermore, when you roll a 19 or 20 this way you regain hit points equal to one of your Favored Soul hit dice plus your Constitution modifier." },
+    { name: "Bloody Phantasia", level: "10th-level Burden of Scorn Feature", body: "You can unleash the murderous power within you as a bonus action by spending a use of Purification, disappearing in a blood-red flash and teleporting to a space adjacent to a creature you can see within 30 feet — you then immediately take an Attack action (requiring no action) against that creature." },
+    { name: "Ruthless Reconstitution", level: "13th-level Burden of Scorn Feature", body: "At the start of each of your turns, if you begin your turn with 1 or more hit points but fewer than half your maximum amount, you regain hit points equal to half your Favored Soul level (rounded down)." }
+  ],
+  },
+};
+
+/* ============================================ FAVORED SOUL PAGE ============ */
+/* A markdown-lite inline renderer: turns **bold** and *italic* into JSX
+   without pulling in a full markdown parser, since this doc uses them
+   constantly for feature names, spell names, and sub-labels. */
+function mdInline(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((chunk, i) => {
+    if (chunk.startsWith("**") && chunk.endsWith("**")) return <strong key={i}>{chunk.slice(2, -2)}</strong>;
+    if (chunk.startsWith("*") && chunk.endsWith("*")) return <em key={i}>{chunk.slice(1, -1)}</em>;
+    return chunk;
+  });
+}
+
+/* A feature's body may contain plain paragraphs and "- " bullet lines mixed
+   together (paragraphs separated by blank lines, same convention as the
+   source doc). Renders each paragraph as <p> and each run of bullets as a
+   real <ul>, both passed through mdInline for bold/italic. */
+function FeatureBody({ text }) {
+  if (!text) return null;
+  const blocks = text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  return (
+    <>
+      {blocks.map((block, i) => {
+        const lines = block.split("\n").map((l) => l.trim());
+        if (lines.every((l) => l.startsWith("- "))) {
+          return (
+            <ul className="lgl-fs-list" key={i}>
+              {lines.map((l, j) => <li key={j}>{mdInline(l.slice(2))}</li>)}
+            </ul>
+          );
+        }
+        return <p className="lgl-fs-p" key={i}>{mdInline(block)}</p>;
+      })}
+    </>
+  );
+}
+
+function ClassLevelTable({ table }) {
+  return (
+    <div className="lgl-fs-tablewrap">
+      <table className="lgl-fs-table">
+        <thead>
+          <tr>{table.header.map((h, i) => <th key={i}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, i) => (
+            <tr key={i}>{row.map((c, j) => <td key={j}>{j === 0 ? <strong>{c}</strong> : c}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function FeatureCard({ feat }) {
+  return (
+    <div className="lgl-fs-feature">
+      <h3 className="lgl-fs-feature-name">{feat.name}</h3>
+      {feat.level && <div className="lgl-fs-feature-level">{feat.level}</div>}
+      <FeatureBody text={feat.body} />
+      {feat.subs?.length > 0 && (
+        <div className="lgl-fs-subs">
+          {feat.subs.map((sub, i) => (
+            <div className="lgl-fs-sub" key={i}>
+              <div className="lgl-fs-sub-name">{sub.name}{sub.tag && <span className="lgl-fs-sub-tag"> ({sub.tag})</span>}</div>
+              <FeatureBody text={sub.body} />
+            </div>
+          ))}
+        </div>
+      )}
+      {feat.statblock && <StatBlockCard sb={feat.statblock} />}
+      {feat.after && <FeatureBody text={feat.after} />}
+    </div>
+  );
+}
+
+function StatBlockCard({ sb }) {
+  const abbrevs = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+  return (
+    <div className="lgl-statblock">
+      <div className="lgl-statblock-name">{sb.name}</div>
+      <div className="lgl-statblock-type">{sb.type}</div>
+      <div className="lgl-statblock-rule" />
+      <div className="lgl-statblock-row"><strong>Armor Class</strong> {sb.ac}</div>
+      <div className="lgl-statblock-row"><strong>Hit Points</strong> {sb.hp}</div>
+      <div className="lgl-statblock-row"><strong>Speed</strong> {sb.speed}</div>
+      <div className="lgl-statblock-rule" />
+      <div className="lgl-statblock-abilities">
+        {sb.abilities.map((a, i) => {
+          const m = a.match(/^(\w+)\s+(.+)$/);
+          return (
+            <div className="lgl-statblock-ability" key={i}>
+              <span className="lgl-statblock-ability-label">{m ? m[1] : abbrevs[i]}</span>
+              <span className="lgl-statblock-ability-val">{m ? m[2] : a}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="lgl-statblock-rule" />
+      {sb.senses && <div className="lgl-statblock-row"><strong>Senses</strong> {sb.senses}</div>}
+      {sb.languages && <div className="lgl-statblock-row"><strong>Languages</strong> {sb.languages}</div>}
+      {sb.traits?.length > 0 && (
+        <>
+          <div className="lgl-statblock-rule" />
+          {sb.traits.map((t, i) => <p className="lgl-statblock-trait" key={i}><em>{t.name}.</em> {mdInline(t.desc)}</p>)}
+        </>
+      )}
+      {sb.actions?.length > 0 && (
+        <>
+          <div className="lgl-statblock-section-h">Actions</div>
+          {sb.actions.map((t, i) => <p className="lgl-statblock-trait" key={i}><em>{t.name}.</em> {mdInline(t.desc)}</p>)}
+        </>
+      )}
+      {sb.bonus?.length > 0 && (
+        <>
+          <div className="lgl-statblock-section-h">Bonus Actions</div>
+          {sb.bonus.map((t, i) => <p className="lgl-statblock-trait" key={i}><em>{t.name}.</em> {mdInline(t.desc)}</p>)}
+        </>
+      )}
+      {sb.reactions?.length > 0 && (
+        <>
+          <div className="lgl-statblock-section-h">Reactions</div>
+          {sb.reactions.map((t, i) => <p className="lgl-statblock-trait" key={i}><em>{t.name}.</em> {mdInline(t.desc)}</p>)}
+        </>
+      )}
+    </div>
+  );
+}
+
+const BURDEN_ICON = {
+  "burden-malveth": { icon: Skull, color: "#9ed17f" },
+  "burden-vaeloria": { icon: Moon, color: "#a8b0dc" },
+  "burden-invidiva": { icon: Eye, color: "#5a8a7a" },
+  "burden-ivsil": { icon: CloudLightning, color: "#2b3f7a" },
+  "burden-lussuria": { icon: Heart, color: "#b563ac" },
+  "burden-tithiss": { icon: Leaf, color: "#2f5023" },
+  "burden-vestias": { icon: Sparkles, color: "#7a6fc9" },
+  "burden-burtromet": { icon: Flame, color: "#d4552f" },
+  "burden-ilsrabae": { icon: Droplets, color: "#2f8fb5" },
+  "burden-mortuous": { icon: Swords, color: "#9a7a4a" },
+  "burden-scorn": { icon: Axe, color: "#8a3a3a" },
+};
+
+function BurdenSection({ id, title, burden }) {
+  const theme = BURDEN_ICON[id];
+  const Icon = theme?.icon;
+  return (
+    <section className="lgl-fs-burden" id={id}>
+      <div className="lgl-fs-burden-headrow">
+        {Icon && (
+          <span className="lgl-fs-burden-icon" style={{ "--burden-color": theme.color }}>
+            <Icon size={22} />
+          </span>
+        )}
+        <h2 className="lgl-fs-burden-title">{title}</h2>
+      </div>
+      {burden.renamedNote && <p className="lgl-fs-burden-note"><em>({burden.renamedNote})</em></p>}
+      {burden.favoredWeapon && <div className="lgl-fs-favweapon">Favored Weapon(s): <strong>{burden.favoredWeapon}</strong></div>}
+      {burden.intro.map((p, i) => <p className="lgl-fs-p" key={i}>{mdInline(p)}</p>)}
+      {burden.features.map((f, i) => <FeatureCard feat={f} key={i} />)}
+    </section>
+  );
+}
+
+const BURDEN_PAGES = [
+  { id: "burden-malveth", title: "Burden of Malveth", key: "burdenMalveth" },
+  { id: "burden-vaeloria", title: "Burden of Vaeloria", key: "burdenVaeloria" },
+  { id: "burden-invidiva", title: "Burden of Invidiva", key: "burdenInvidiva" },
+  { id: "burden-ivsil", title: "Burden of Ivsil", key: "burdenIvsil" },
+  { id: "burden-lussuria", title: "Burden of Lussuria", key: "burdenLussuria" },
+  { id: "burden-tithiss", title: "Burden of Tithiss", key: "burdenTithiss" },
+  { id: "burden-vestias", title: "Burden of Vestias", key: "burdenVestias" },
+  { id: "burden-burtromet", title: "Burden of Burtromet", key: "burdenBurtromet" },
+  { id: "burden-ilsrabae", title: "Burden of Ilsrabae", key: "burdenIlsrabae" },
+  { id: "burden-mortuous", title: "Burden of Mortuous", key: "burdenMortuous" },
+  { id: "burden-scorn", title: "Burden of Scorn", key: "burdenScorn" },
+];
+
+function FavoredSoulPage() {
+  const d = FAVSOUL_DATA;
+  const [burdenId, setBurdenId] = useState(null);
+  useEffect(() => {
+    document.querySelector(".lgl-main")?.scrollTo({ top: 0, behavior: "auto" });
+  }, [burdenId]);
+
+  if (burdenId) {
+    const page = BURDEN_PAGES.find((b) => b.id === burdenId);
+    return (
+      <article className="lgl-entry wide lgl-fs">
+        <button className="lgl-backlink" onClick={() => setBurdenId(null)}><ChevronLeft size={14} /> All Cosmic Burdens</button>
+        <BurdenSection id={page.id} title={page.title} burden={d[page.key]} />
+      </article>
+    );
+  }
+
+  return (
+    <article className="lgl-entry wide lgl-fs">
+      <header className="lgl-entry-head">
+        <div className="lgl-eyebrow">Homebrew Class</div>
+        <h1>The Favored Soul</h1>
+        <p className="lgl-tagline">A caster shaped by an involuntary divine bargain, between the versatility of a Warlock and the martial edge of a Paladin.</p>
+      </header>
+
+      {d.intro.map((p, i) => <p className="lgl-fs-p" key={i}>{mdInline(p)}</p>)}
+
+      <h2 className="lgl-fs-h2">The Favored Soul Table</h2>
+      <ClassLevelTable table={d.table} />
+
+      <h2 className="lgl-fs-h2">Class Features</h2>
+      {d.classFeaturesPreamble.map((p, i) => <p className="lgl-fs-p" key={i}>{mdInline(p)}</p>)}
+      {d.classFeatures.map((f, i) => <FeatureCard feat={f} key={i} />)}
+
+      <h2 className="lgl-fs-h2">Cosmic Burdens</h2>
+      <p className="lgl-fs-p">{mdInline(d.cosmicBurdens.intro)}</p>
+      <div className="lgl-fs-burdengrid">
+        {d.cosmicBurdens.items.map((it, i) => {
+          const bid = "burden-" + it.name.toLowerCase().replace(/\s+/g, "-");
+          const t = BURDEN_ICON[bid];
+          const Icon = t?.icon;
+          const hasPage = BURDEN_PAGES.some((b) => b.id === bid);
+          return (
+            <button
+              key={i}
+              className="lgl-fs-burdenbtn"
+              style={{ "--burden-color": t?.color || "var(--accent)" }}
+              onClick={() => hasPage && setBurdenId(bid)}
+              disabled={!hasPage}
+            >
+              {Icon && <span className="lgl-fs-burdenbtn-icon"><Icon size={22} /></span>}
+              <span className="lgl-fs-burdenbtn-name">{it.name}</span>
+              <span className="lgl-fs-burdenbtn-desc">{it.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+    </article>
+  );
+}
+
 
 function MechanicsHome({ onOpen }) {
   return (
@@ -4500,6 +5034,7 @@ function MechanicsHome({ onOpen }) {
 function MechanicsModule({ params, navigate }) {
   const [selectedId, setSelectedId] = useState(params?.entryId || MECH_HOME);
   useEffect(() => { if (params?.entryId) setSelectedId(params.entryId); }, [params?.entryId]);
+  useEffect(() => { document.querySelector(".lgl-main")?.scrollTo({ top: 0, behavior: "auto" }); }, [selectedId]);
   const entry = CONTENT.mechanics.find((e) => e.id === selectedId);
   const aside = (
     <nav className="lgl-side" aria-label="Mechanics navigation">
@@ -4525,6 +5060,7 @@ function MechanicsModule({ params, navigate }) {
     <ModuleShell aside={aside} asideTitle="Mechanics">
       {selectedId === MECH_HOME ? <MechanicsHome onOpen={setSelectedId} />
         : selectedId === MECH_TRAIT_INDEX ? <LegacyTraitIndex navigate={navigate} />
+        : selectedId === "favoredsoul" ? <FavoredSoulPage />
         : <EntryPage entry={entry} />}
     </ModuleShell>
   );
@@ -4690,6 +5226,128 @@ const GM_UNLOCK_KEY = "lgl-gm-unlocked-v1";
 
 const GMAccessContext = createContext(null);
 
+/* ============================================ DEV MODE ===================== */
+/* Lets you edit Codex prose right on the page. Edits save to this browser's
+   localStorage only — they never touch the source file, so use "Export
+   Edits" to hand the JSON back for folding into the real data. */
+const DEV_EDITS_KEY = "lgl-dev-edits-v1";
+const DEV_MODE_KEY = "lgl-dev-mode-v1";
+
+function loadDevEdits() {
+  try { return JSON.parse(localStorage.getItem(DEV_EDITS_KEY) || "{}"); } catch { return {}; }
+}
+function saveDevEdits(edits) {
+  try { localStorage.setItem(DEV_EDITS_KEY, JSON.stringify(edits)); } catch {}
+}
+
+const DevModeContext = createContext(null);
+
+/* Applies this browser's saved edits over an entry's lore text at render
+   time. Never mutates CONTENT — always non-destructive and reversible. */
+function applyDevEdits(entry, edits) {
+  if (!entry) return entry;
+  const e = edits[entry.id];
+  if (!e) return entry;
+  return {
+    ...entry,
+    lore: e.lore !== undefined ? e.lore : entry.lore,
+    tagline: e.tagline !== undefined ? e.tagline : entry.tagline,
+    loreSections: entry.loreSections?.map((sec, i) => {
+      const se = e.sections?.[i];
+      if (!se) return sec;
+      return {
+        ...sec,
+        h: se.h !== undefined ? se.h : sec.h,
+        p: sec.p.map((para, j) => (typeof para === "string" && se.p?.[j] !== undefined ? se.p[j] : para)),
+      };
+    }),
+  };
+}
+
+/* A piece of text that becomes contentEditable when Dev Mode is on. Saves
+   to the Dev Mode context on blur, so typing never triggers a re-render. */
+function DevEditable({ as: Tag = "p", value, onSave, className }) {
+  const { devMode } = useContext(DevModeContext) || {};
+  if (!devMode) return <Tag className={className}>{parseLore(value)}</Tag>;
+  return (
+    <Tag
+      className={(className || "") + " lgl-dev-editable"}
+      contentEditable
+      suppressContentEditableWarning
+      title="Editing raw text — [[links]] use double brackets"
+      onBlur={(e) => {
+        const t = e.currentTarget.textContent;
+        if (t !== value) onSave(t);
+      }}
+    >
+      {value}
+    </Tag>
+  );
+}
+
+function DevModeProvider({ children }) {
+  const [devMode, setDevMode] = useState(() => { try { return localStorage.getItem(DEV_MODE_KEY) === "1"; } catch { return false; } });
+  const [edits, setEdits] = useState(() => loadDevEdits());
+  const [history, setHistory] = useState([]); // stack of previous `edits` snapshots, for Undo
+  const [confirmingReset, setConfirmingReset] = useState(false);
+  const toggleDevMode = () => setDevMode((d) => { const next = !d; try { localStorage.setItem(DEV_MODE_KEY, next ? "1" : "0"); } catch {} return next; });
+
+  const updateEdit = (entryId, updater) => {
+    setEdits((prev) => {
+      setHistory((h) => [...h, prev].slice(-25)); // cap history so it can't grow unbounded
+      const merged = { ...prev, [entryId]: updater(prev[entryId] || {}) };
+      saveDevEdits(merged);
+      return merged;
+    });
+  };
+  const editCount = Object.keys(edits).length;
+  const exportEdits = () => {
+    const blob = new Blob([JSON.stringify(edits, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "loglandia-dev-edits.json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  /* window.confirm() is blocked in some sandboxed previews, so Reset All
+     confirms inline in the bar instead of using a browser dialog. */
+  const requestReset = () => {
+    if (!confirmingReset) { setConfirmingReset(true); return; }
+    setHistory((h) => [...h, edits].slice(-25));
+    setEdits({}); saveDevEdits({});
+    setConfirmingReset(false);
+  };
+  const undo = () => {
+    setHistory((h) => {
+      if (!h.length) return h;
+      const prevState = h[h.length - 1];
+      setEdits(prevState);
+      saveDevEdits(prevState);
+      return h.slice(0, -1);
+    });
+    setConfirmingReset(false);
+  };
+  return (
+    <DevModeContext.Provider value={{ devMode, edits, updateEdit }}>
+      {children}
+      <button className={"lgl-devfab" + (devMode ? " is-on" : "")} onClick={toggleDevMode} title={devMode ? "Turn off Dev Mode" : "Turn on Dev Mode"}>
+        <Wrench size={17} />
+      </button>
+      {devMode && (
+        <div className="lgl-devbar">
+          <span className="lgl-devbar-dot" /> Dev Mode — click any lore text to edit. Saves to this browser only.
+          {editCount > 0 && <span className="lgl-devbar-count">{editCount} entr{editCount === 1 ? "y" : "ies"} edited</span>}
+          <button className="lgl-devbar-btn" onClick={exportEdits} disabled={editCount === 0}>Export Edits</button>
+          <button className="lgl-devbar-btn" onClick={undo} disabled={history.length === 0} title="Undo the last change">Undo</button>
+          <button className={"lgl-devbar-btn is-danger" + (confirmingReset ? " is-confirming" : "")} onClick={requestReset} onMouseLeave={() => setConfirmingReset(false)} disabled={editCount === 0}>
+            {confirmingReset ? "Click to confirm" : "Reset All"}
+          </button>
+        </div>
+      )}
+    </DevModeContext.Provider>
+  );
+}
+
 function GMAccessProvider({ children }) {
   const [unlocked, setUnlocked] = useState(() => { try { return localStorage.getItem(GM_UNLOCK_KEY) === "1"; } catch { return false; } });
   const unlock = (pw) => {
@@ -4725,6 +5383,7 @@ export default function LoglandiaShell() {
   const mk = route.module;
   return (
     <GMAccessProvider>
+    <DevModeProvider>
     <div className="lgl">
       <style>{CSS}</style>
       <header className="lgl-topbar">
@@ -4753,6 +5412,7 @@ export default function LoglandiaShell() {
         </NavContext.Provider>
       </div>
     </div>
+    </DevModeProvider>
     </GMAccessProvider>
   );
 }
@@ -4849,7 +5509,7 @@ body{ display:block; place-items:unset; }
 .lgl-entry h1{ font-family:var(--serif); font-weight:600; font-size:52px; line-height:1.04; margin:0; letter-spacing:-.01em; }
 .lgl-tagline{ font-family:var(--serif); font-style:italic; font-size:19px; color:var(--mid); margin:14px 0 0; }
 .lgl-art{ height:200px; border:1px solid var(--line); border-radius:10px; background:repeating-linear-gradient(135deg, transparent 0 22px, rgba(255,255,255,.012) 22px 44px), linear-gradient(180deg, var(--elev), var(--surface)); display:flex; align-items:center; justify-content:center; margin-bottom:28px; }
-.lgl-art-real{ height:auto; max-height:420px; width:100%; object-fit:cover; object-position:top center; background:none; }
+.lgl-art-real{ display:block; height:auto; max-height:480px; width:100%; object-fit:contain; object-position:center; background:linear-gradient(180deg, var(--elev), var(--surface)); border:1px solid var(--line); border-radius:10px; }
 .lgl-art span{ font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--faint); }
 .lgl-lore{ font-size:17px; color:var(--hi); margin:0 0 22px; }
 .lgl-facts{ margin:0 0 26px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
@@ -5158,6 +5818,22 @@ body{ display:block; place-items:unset; }
 .lgl-aside-wrap::-webkit-scrollbar-track{ background:rgba(0,0,0,.28); }
 .lgl-aside-wrap::-webkit-scrollbar-thumb{ background:rgba(120,112,100,.5); border-radius:8px; }
 
+/* ---- Dev Mode ---- */
+.lgl-devfab{ position:fixed; right:20px; bottom:20px; z-index:60; display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--faint); cursor:pointer; box-shadow:0 8px 26px -10px rgba(0,0,0,.6); transition:border-color .15s, color .15s, background .15s, transform .15s; }
+.lgl-devfab:hover{ transform:translateY(-2px); border-color:var(--accent); color:var(--accent); }
+.lgl-devfab.is-on{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+.lgl-devbar{ position:fixed; left:50%; transform:translateX(-50%); bottom:20px; z-index:59; display:flex; align-items:center; gap:12px; padding:10px 18px; border-radius:999px; border:1px solid rgba(200,168,107,.45); background:#141416; color:var(--mid); font-size:12.5px; box-shadow:0 10px 30px -10px rgba(0,0,0,.7); }
+.lgl-devbar-dot{ width:7px; height:7px; border-radius:999px; background:#e0574f; flex:0 0 auto; animation:lgl-pulse 1.6s ease-in-out infinite; }
+.lgl-devbar-count{ font-size:11px; color:var(--accent); letter-spacing:.04em; }
+.lgl-devbar-btn{ background:none; border:1px solid var(--line); border-radius:999px; padding:5px 13px; cursor:pointer; color:var(--hi); font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; }
+.lgl-devbar-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+.lgl-devbar-btn:disabled{ opacity:.35; cursor:default; }
+.lgl-devbar-btn.is-danger:hover:not(:disabled){ border-color:#e0574f; color:#e0574f; }
+.lgl-devbar-btn.is-danger.is-confirming{ border-color:#e0574f; color:#e0574f; background:rgba(224,87,79,.12); }
+.lgl-dev-editable{ cursor:text; border-radius:6px; outline:1px dashed rgba(200,168,107,.4); outline-offset:4px; transition:background .15s, outline-color .15s; }
+.lgl-dev-editable:hover{ background:rgba(200,168,107,.05); }
+.lgl-dev-editable:focus{ outline:1px solid var(--accent); background:rgba(200,168,107,.08); }
+
 /* ---- GM password prompt (inside GMFold) ---- */
 .lgl-gmfold-lock{ margin-top:16px; padding:20px; border:1px dashed rgba(200,90,80,.35); border-radius:10px; background:rgba(200,90,80,.03); display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; }
 .lgl-gmfold-lock-icon{ color:#c97a72; opacity:.8; }
@@ -5202,6 +5878,82 @@ body{ display:block; place-items:unset; }
 
 /* ---- Shared "more to come" empty state ---- */
 .lgl-morecoming{ padding:60px 20px; text-align:center; font-family:var(--serif); font-size:18px; font-style:italic; color:var(--faint); }
+
+/* ---- Favored Soul: D&D-wiki-style class page ---- */
+.lgl-fs{ max-width:760px; }
+.lgl-fs-p{ font-size:15px; line-height:1.7; color:var(--mid); margin:0 0 14px; }
+.lgl-fs-p strong{ color:var(--hi); font-weight:700; }
+.lgl-fs-p em{ color:var(--accent); font-style:italic; }
+.lgl-fs-h2{ font-family:var(--serif); font-size:22px; font-weight:700; color:var(--hi); margin:38px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--accent); }
+.lgl-fs-callout{ margin:20px 0 28px; padding:18px 22px; border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; background:rgba(200,168,107,.05); }
+.lgl-fs-callout-h{ font-family:var(--serif); font-size:15px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+.lgl-fs-callout .lgl-fs-p{ font-size:14px; margin-bottom:10px; }
+.lgl-fs-callout .lgl-fs-p:last-child{ margin-bottom:0; }
+
+/* Table */
+.lgl-fs-tablewrap{ overflow-x:auto; margin:0 0 30px; border:1px solid var(--line); border-radius:8px; }
+.lgl-fs-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+.lgl-fs-table th{ background:var(--elev); color:var(--accent); font-family:var(--serif); font-weight:700; letter-spacing:.03em; text-align:left; padding:10px 14px; border-bottom:2px solid var(--accent); white-space:nowrap; }
+.lgl-fs-table td{ padding:8px 14px; border-bottom:1px solid var(--line); color:var(--mid); white-space:nowrap; }
+.lgl-fs-table td strong{ color:var(--hi); }
+.lgl-fs-table tr:last-child td{ border-bottom:none; }
+.lgl-fs-table tr:nth-child(even){ background:rgba(255,255,255,.014); }
+.lgl-fs-table tr:hover{ background:rgba(200,168,107,.06); }
+
+/* Feature cards */
+.lgl-fs-feature{ margin:0 0 26px; padding-left:16px; border-left:2px solid var(--line); }
+.lgl-fs-subs{ display:flex; flex-direction:column; gap:12px; margin:10px 0 14px; }
+.lgl-fs-sub{ padding:10px 14px; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(200,168,107,.04); }
+.lgl-fs-sub-name{ font-size:13.5px; font-weight:700; color:var(--hi); margin-bottom:4px; }
+.lgl-fs-sub-tag{ font-size:11.5px; font-weight:400; font-style:italic; color:var(--accent); }
+.lgl-fs-sub .lgl-fs-p{ font-size:13.5px; margin:0; }
+.lgl-fs-feature-name{ font-family:var(--serif); font-size:17px; font-weight:700; color:var(--hi); margin:0 0 2px; }
+.lgl-fs-feature-level{ font-size:11.5px; font-style:italic; color:var(--accent); letter-spacing:.02em; margin-bottom:8px; }
+.lgl-fs-feature .lgl-fs-p{ font-size:14.5px; }
+.lgl-fs-list{ margin:0 0 14px; padding-left:22px; }
+.lgl-fs-list li{ font-size:14.5px; line-height:1.65; color:var(--mid); margin-bottom:6px; }
+.lgl-fs-list li strong{ color:var(--hi); }
+.lgl-fs-list li em{ color:var(--accent); font-style:italic; }
+
+/* Cosmic Burdens list + note callout */
+.lgl-fs-notecallout{ font-size:13px; line-height:1.6; color:var(--mid); padding:14px 18px; margin:14px 0 24px; border:1px dashed var(--line); border-radius:8px; background:rgba(255,255,255,.02); }
+.lgl-fs-notecallout strong{ color:var(--accent); text-transform:uppercase; font-size:11px; letter-spacing:.08em; }
+.lgl-fs-burdengrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; margin:20px 0 10px; }
+.lgl-fs-burdenbtn{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:20px 16px; cursor:pointer; border:1px solid var(--line); border-top:3px solid var(--burden-color); border-radius:12px; background:linear-gradient(180deg, color-mix(in srgb, var(--burden-color) 12%, transparent), transparent 78%); color:var(--hi); transition:transform .15s, border-color .15s, box-shadow .15s, background .15s; }
+.lgl-fs-burdenbtn:not(:disabled):hover{ transform:translateY(-3px); border-color:var(--burden-color); box-shadow:0 10px 28px -14px var(--burden-color); }
+.lgl-fs-burdenbtn:disabled{ cursor:default; opacity:.55; }
+.lgl-fs-burdenbtn-icon{ display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:999px; color:var(--burden-color); background:color-mix(in srgb, var(--burden-color) 16%, transparent); border:1px solid color-mix(in srgb, var(--burden-color) 40%, transparent); }
+.lgl-fs-burdenbtn-name{ font-family:var(--serif); font-size:16px; font-weight:700; color:var(--hi); }
+.lgl-fs-burdenbtn-desc{ font-size:12px; line-height:1.5; color:var(--mid); }
+.lgl-fs-burdenlist{ list-style:none; margin:0 0 20px; padding:0; display:flex; flex-direction:column; gap:10px; }
+.lgl-fs-burdenlist li{ font-size:14px; line-height:1.65; color:var(--mid); padding:12px 16px; border:1px solid var(--line); border-radius:7px; background:var(--surface); }
+.lgl-fs-burdenlist-item{ display:flex; align-items:flex-start; gap:12px; }
+.lgl-fs-burdenlist-icon{ display:flex; align-items:center; justify-content:center; width:28px; height:28px; flex:0 0 auto; margin-top:1px; border-radius:999px; color:var(--burden-color); background:color-mix(in srgb, var(--burden-color) 16%, transparent); border:1px solid color-mix(in srgb, var(--burden-color) 45%, transparent); }
+.lgl-fs-burdenlist li strong{ color:var(--hi); }
+
+/* Subclass (Burden) sections */
+.lgl-fs-burden{ margin-top:48px; padding-top:8px; border-top:3px double var(--line); }
+.lgl-fs-burden-headrow{ display:flex; align-items:center; gap:14px; margin-top:20px; }
+.lgl-fs-burden-icon{ display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex:0 0 auto; border-radius:999px; color:var(--burden-color); background:color-mix(in srgb, var(--burden-color) 16%, transparent); border:1px solid color-mix(in srgb, var(--burden-color) 45%, transparent); }
+.lgl-fs-burden-title{ font-family:var(--serif); font-size:26px; font-weight:700; color:var(--accent); margin:0 0 6px; }
+.lgl-fs-burden-note{ font-size:12.5px; color:var(--faint); margin:0 0 12px; }
+.lgl-fs-favweapon{ font-size:12.5px; letter-spacing:.04em; color:var(--mid); text-transform:uppercase; margin-bottom:14px; }
+.lgl-fs-favweapon strong{ color:var(--hi); text-transform:none; }
+
+/* Stat block card */
+.lgl-statblock{ margin:16px 0 20px; padding:18px 20px; border:1px solid rgba(200,168,107,.4); border-radius:8px; background:linear-gradient(180deg, rgba(200,168,107,.06), var(--surface)); max-width:420px; }
+.lgl-statblock-name{ font-family:var(--serif); font-size:19px; font-weight:700; color:var(--hi); }
+.lgl-statblock-type{ font-size:12.5px; font-style:italic; color:var(--mid); margin-bottom:8px; }
+.lgl-statblock-rule{ height:2px; background:linear-gradient(90deg, var(--accent), transparent); margin:8px 0; }
+.lgl-statblock-row{ font-size:13px; color:var(--mid); margin:3px 0; }
+.lgl-statblock-row strong{ color:var(--hi); margin-right:5px; }
+.lgl-statblock-abilities{ display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; text-align:center; margin:6px 0; }
+.lgl-statblock-ability{ display:flex; flex-direction:column; padding:4px 2px; border:1px solid var(--line); border-radius:5px; background:var(--elev); }
+.lgl-statblock-ability-label{ font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--accent); }
+.lgl-statblock-ability-val{ font-size:12px; color:var(--hi); }
+.lgl-statblock-section-h{ font-family:var(--serif); font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.05em; margin:12px 0 6px; }
+.lgl-statblock-trait{ font-size:13px; line-height:1.6; color:var(--mid); margin:0 0 8px; }
+.lgl-statblock-trait em{ color:var(--hi); font-style:italic; }
 
 /* MECHANICS fold on Codex race entries */
 .lgl-mechfold{ margin-top:34px; border-top:1px solid var(--line); padding-top:22px; }
