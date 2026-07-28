@@ -2672,7 +2672,7 @@ function HeroBlocksEditor({ blocks, setBlocks }) {
               <button type="button" onClick={() => remove(i)} title="Remove this section" className="is-danger">✕</button>
             </div>
           </div>
-          <textarea className="lgl-heroblock-body-input" value={b.body} onChange={(e) => update(i, "body", e.target.value)} rows={4} placeholder="Write whatever you want here." />
+          <textarea className="lgl-heroblock-body-input lgl-textbox" value={b.body} onChange={(e) => update(i, "body", e.target.value)} rows={4} placeholder="Write whatever you want here." />
         </div>
       ))}
       <button type="button" className="lgl-heroblock-add" onClick={add}>+ Add a Section</button>
@@ -2704,8 +2704,8 @@ function HeroConnectionsEditor({ connections, setConnections }) {
     <div className="lgl-hero-connections-edit">
       {connections.map((c, i) => (
         <div className="lgl-hero-connection-row" key={i}>
-          <input value={c.name} onChange={(e) => update(i, "name", e.target.value)} placeholder="Name" className="lgl-hero-connection-name" />
-          <input value={c.relation} onChange={(e) => update(i, "relation", e.target.value)} placeholder="Relation — mother, rival, old friend…" className="lgl-hero-connection-rel" />
+          <input value={c.name} onChange={(e) => update(i, "name", e.target.value)} placeholder="Name" className="lgl-hero-connection-name lgl-textbox" />
+          <input value={c.relation} onChange={(e) => update(i, "relation", e.target.value)} placeholder="Relation — mother, rival, old friend…" className="lgl-hero-connection-rel lgl-textbox" />
           <button type="button" className="lgl-hero-connection-remove" onClick={() => remove(i)} title="Remove">✕</button>
         </div>
       ))}
@@ -2942,8 +2942,8 @@ function HeroDetailPage({ hero, allHeroes, onBack, onSaved, onOpenHero }) {
         <>
           <header className="lgl-entry-head">
             {avatarUrl
-              ? <img src={avatarUrl} alt={heroName} className="lgl-art lgl-art-real lgl-hero-avatar-real" />
-              : <div className="lgl-art" aria-hidden="true"><span>no portrait yet</span></div>}
+              ? <img src={avatarUrl} alt={heroName} className="lgl-hero-avatar-real" />
+              : <div className="lgl-hero-avatar-real lgl-hero-avatar-real-empty" aria-hidden="true"><UserPlus size={40} /></div>}
             <h1>{heroName || "Unnamed Hero"}</h1>
             {(raceText || classText) && <p className="lgl-hero-raceclass">{[raceText, classText].filter(Boolean).join(" · ")}</p>}
             <p className="lgl-tagline">Played by {playerName || "someone mysterious"}</p>
@@ -6208,8 +6208,9 @@ body{ display:block; place-items:unset; }
 .lgl-hero-editcard-title{ font-family:var(--serif); font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--hero-color); }
 .lgl-hero-edit-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .lgl-hero-edit-label{ display:flex; flex-direction:column; gap:6px; font-size:12px; letter-spacing:.04em; color:var(--faint); text-transform:uppercase; }
-.lgl-hero-edit-label input, .lgl-hero-edit-label select, .lgl-hero-edit-label textarea{ font-family:var(--sans); font-size:14px; text-transform:none; letter-spacing:normal; color:var(--hi); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 12px; resize:vertical; }
-.lgl-hero-edit-label input:focus, .lgl-hero-edit-label select:focus, .lgl-hero-edit-label textarea:focus{ outline:none; border-color:var(--hero-color); }
+.lgl-hero-edit-label input, .lgl-hero-edit-label select, .lgl-hero-edit-label textarea, .lgl-textbox{ font-family:var(--sans); font-size:14px; text-transform:none; letter-spacing:normal; color:var(--hi); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 13px; resize:vertical; box-shadow:inset 0 1px 4px rgba(0,0,0,.4); transition:border-color .15s ease, box-shadow .15s ease; }
+.lgl-hero-edit-label input::placeholder, .lgl-hero-edit-label textarea::placeholder, .lgl-textbox::placeholder{ color:var(--faint); }
+.lgl-hero-edit-label input:focus, .lgl-hero-edit-label select:focus, .lgl-hero-edit-label textarea:focus, .lgl-textbox:focus{ outline:none; border-color:var(--hero-color, var(--accent)); box-shadow:inset 0 1px 4px rgba(0,0,0,.4), 0 0 0 3px color-mix(in srgb, var(--hero-color, var(--accent)) 22%, transparent); }
 @media (max-width:640px){ .lgl-hero-edit-row{ grid-template-columns:1fr; } }
 
 /* ---- Hero accent color theming — applied broadly, not just a couple of accents ---- */
@@ -6217,7 +6218,8 @@ body{ display:block; place-items:unset; }
 .lgl-hero-page::before{ content:""; position:absolute; top:-2px; left:50%; transform:translateX(-50%); width:120px; height:4px; border-radius:999px; background:var(--hero-color); box-shadow:0 0 24px 2px var(--hero-color); }
 .lgl-hero-page .lgl-entry-head{ position:relative; }
 .lgl-hero-page .lgl-entry-head h1{ text-shadow:0 0 40px color-mix(in srgb, var(--hero-color) 35%, transparent); }
-.lgl-hero-page .lgl-hero-avatar-real{ border-color:var(--hero-color) !important; box-shadow:0 0 0 1px var(--hero-color), 0 10px 22px -10px var(--hero-color) !important; filter:drop-shadow(0 0 1px var(--hero-color)) drop-shadow(0 0 1px var(--hero-color)) drop-shadow(0 12px 26px -8px var(--hero-color)); }
+.lgl-hero-avatar-real{ display:block; width:200px; height:200px; margin:0 auto 18px; border-radius:999px; object-fit:cover; border:3px solid var(--hero-color); box-shadow:0 0 0 4px var(--bg), 0 0 0 5px color-mix(in srgb, var(--hero-color) 55%, transparent), 0 12px 30px -10px var(--hero-color); }
+.lgl-hero-avatar-real-empty{ display:flex; align-items:center; justify-content:center; background:var(--elev); color:var(--faint); }
 .lgl-hero-editbtn.is-save{ border-color:var(--hero-color); background:color-mix(in srgb, var(--hero-color) 14%, transparent); color:var(--hero-color); }
 .lgl-herocard{ border-top:3px solid var(--hero-color); }
 .lgl-herocard:hover{ box-shadow:0 10px 26px -16px var(--hero-color); }
@@ -6269,8 +6271,8 @@ body{ display:block; place-items:unset; }
 .lgl-heroblocks-edit{ display:flex; flex-direction:column; gap:14px; }
 .lgl-heroblock-edit{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); }
 .lgl-heroblock-edit-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.lgl-heroblock-title-input{ flex:1; font-family:var(--serif); font-weight:700; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); padding:4px 2px; color:var(--hi); }
-.lgl-heroblock-title-input:focus{ outline:none; border-bottom-color:var(--accent); }
+.lgl-heroblock-title-input{ flex:1; font-family:var(--serif); font-weight:700; font-size:15px; background:none; border:none; border-bottom:1px solid var(--line); padding:6px 4px; color:var(--hi); transition:border-color .15s ease; }
+.lgl-heroblock-title-input:focus{ outline:none; border-bottom:2px solid var(--hero-color, var(--accent)); padding-bottom:5px; }
 .lgl-heroblock-edit-controls{ display:flex; gap:4px; flex:0 0 auto; }
 .lgl-heroblock-edit-controls button{ width:26px; height:26px; border-radius:6px; border:1px solid var(--line); background:none; color:var(--faint); cursor:pointer; font-size:12px; }
 .lgl-heroblock-edit-controls button:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
