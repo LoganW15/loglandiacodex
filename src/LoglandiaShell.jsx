@@ -51,6 +51,49 @@ async function supaFetch(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+/* ============================================================================
+   HEROES OF LOGLANDIA — portrait uploads
+   ----------------------------------------------------------------------------
+   Uses Supabase Storage rather than the table API. One-time setup: in the
+   Supabase dashboard, Storage -> New bucket -> name it "hero-portraits" ->
+   mark it Public. No other config needed; the anon key already in use for
+   the rest of the site is enough to upload to it.
+
+   Supabase table to create (SQL editor), alongside the `characters` one:
+     create table heroes (
+       id uuid default gen_random_uuid() primary key,
+       player_name text not null,
+       hero_name text not null,
+       avatar_url text,
+       bio text,
+       blocks jsonb default '[]'::jsonb,
+       character_id uuid,
+       created_at timestamptz default now()
+     );
+     alter table heroes enable row level security;
+     create policy "public read" on heroes for select using (true);
+     create policy "public insert" on heroes for insert with check (true);
+     create policy "public update" on heroes for update using (true);
+   ========================================================================== */
+const HERO_BUCKET = "hero-portraits";
+const HERO_IMAGE_MAX_MB = 5;
+
+async function supaStorageUpload(bucket, file) {
+  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+  const key = `${(crypto.randomUUID?.() || Math.random().toString(36).slice(2))}.${ext}`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${key}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
+  });
+  if (!res.ok) throw new Error(`Upload failed ${res.status}`);
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${key}`;
+}
+
 /* localStorage can throw (private browsing, artifact preview sandboxes) — never let it crash the app. */
 const PLAYER_NAMES = ["Edward", "Jared", "Ethan", "Sarah P", "Sarah J", "Sarah C", "Logan", "Jesse"];
 
@@ -59,7 +102,6 @@ const PLAYER_NAMES = ["Edward", "Jared", "Ethan", "Sarah P", "Sarah J", "Sarah C
    could later link straight to that campaign's log. */
 const CHARACTER_CAMPAIGNS = [
   { id: "emberfall", name: "Campaign 1" },
-  { id: "tides", name: "Tides of the East" },
 ];
 const JUST_FOR_FUN = { id: "fun", name: "Just for Fun" };
 
@@ -1141,7 +1183,7 @@ const CONTENT = {
         { label: "Connections", text: "Live wire — her father: a Drakel of blue descent who carried messages between Vaelrath and Tenkyra, and stopped when he met a human woman in Shirokane. He is the man who walked past her god's house a hundred times without going in, and she has never asked him why he quit the road. Warm — Setsariel, a Kitsune scholar she met in the Kingsmont library, both of them chasing Tenkyra through old paper. He is the only reminder of home she has this far south, and she would never say so. Thread, unlit — Mortuous watches promising warriors, refines them quietly, and challenges them at their peak. A traveling duelist honing speed against a god's standard is exactly what he collects." },
         { label: "Players know", text: "A loud, friendly, absurdly quick duelist from Tenkyra, proud of her Drakel father, following the Way of Musashi. She will tell anyone who stands still that she is hunting her god's lost swords, and most people find this charming and none of them help. Everyone calls her the Bolt of Shirokane. What nobody quite registers is that when she says she was slow, she means it." },
       ] },
-    { id: "mylo", name: "Mylo", eyebrow: "Character · Adventurer",
+    { id: "mylo", name: "Aurelio II", eyebrow: "Character · Adventurer",
       tagline: "\"the Sun Blooded\"",
       lore: "He comes in unhurried, grinning, already sure the day is going to go his way. Red hair, one eye, a chest full of scars, and he will tell you the story behind any of them, though the stories get better every year. When the crowds call him kin to the great Sun Elf general he just laughs. He is obviously human. It has never once hurt ticket sales.",
       facts: [
@@ -1156,9 +1198,9 @@ const CONTENT = {
         { label: "Knife (second)", text: "The eye went to a beast, in a fight that lasted from morning gate to torchlight. He dines out on that story. He leaves out that he still dreams about it. Men make sense to him, even the ones trying to kill him, but the thing in the sand that day wanted nothing he understood." },
         { label: "Contradiction", text: "Twenty thousand people scream his name on a festival day, and he is starving." },
         { label: "The eye", text: "A ruby sits in the socket under the patch. Hardly anyone has seen it, and every story circulating about it is wrong, which he enjoys. Where it came from and whether it does anything: left open on purpose." },
-        { label: "The name", text: "He turned up in Pyrra young, red-haired, with no past anyone could find, carrying nothing but his name and a stubborn certainty that he was meant for something large. (DM note: Ehala. The other Mylo is not in play. Flavor, not a thread.)" },
+        { label: "The name", text: "He turned up in Pyrra young, red-haired, with no past anyone could find, carrying nothing but his name and a stubborn certainty that he was meant for something large. (DM note: Ehala. The other Aurelio II is not in play. Flavor, not a thread.)" },
         { label: "Lever", text: "Rich, famous, bored. Offer him a real fight or a real monster and he will work for insultingly little. He also knows everyone in Pyrra worth knowing, and his benefactor knows the rest." },
-        { label: "Connections", text: "Live wire — the benefactor, a fighting-pit legend who took in a red-haired nobody on a hunch and made him the biggest draw in the city's history; it started as business and turned into something like family (to be fleshed out later). Warm — Duro, a fire-marked brute he spars with off the books; half the city manages every fight Mylo has, Duro is the one who doesn't. Loaded rumor — the Sun Blooded name travels, and Aurelio's blood is a war-claim in the deep desert that has never ended. Thread, unlit — Mortuous quietly refines promising warriors and challenges them at their peak; Mylo prays to him daily and wants exactly one thing, a challenge worth answering." },
+        { label: "Connections", text: "Live wire — the benefactor, a fighting-pit legend who took in a red-haired nobody on a hunch and made him the biggest draw in the city's history; it started as business and turned into something like family (to be fleshed out later). Warm — Duro, a fire-marked brute he spars with off the books; half the city manages every fight Aurelio II has, Duro is the one who doesn't. Loaded rumor — the Sun Blooded name travels, and Aurelio's blood is a war-claim in the deep desert that has never ended. Thread, unlit — Mortuous quietly refines promising warriors and challenges them at their peak; Aurelio II prays to him daily and wants exactly one thing, a challenge worth answering." },
         { label: "Prayer ritual", text: "In the tunnel, before the gate, he kisses the flat of the lance-head and presses it to the patch for a moment. Nobody has ever asked him about it, and he has never explained." },
         { label: "Players know", text: "The undefeated champion of Pyrra. Red-haired, one-eyed, loud, generous, hard not to like. Called the Sun Blooded, rumored kin to the great Sun Elf general, plainly human. Prays to Mortuous. Tells anyone who asks that he wants out of the pits and into a war." },
       ] },
@@ -1766,7 +1808,7 @@ const WIKI_SECTIONS = [
   { key: "gods", label: "Gods" },
   { key: "regions", label: "Locations" },
   { key: "organizations", label: "Organizations" },
-  { key: "characters", label: "Characters" },
+  { key: "characters", label: "NPCs" },
 ];
 
 const EVENTS = [];
@@ -2364,7 +2406,7 @@ function EntryPage({ entry: rawEntry, hideLegacy, hideSubraces, hideArt, onOpenE
 /* ===================================================== MODULE: WIKI ======= */
 const WIKI_SECTION_ICONS = { races: Sparkles, characters: BookOpen, gods: Gem, regions: MapIcon, organizations: Shapes };
 
-function WikiHome({ onOpenEntry, onOpenTimeline, onOpenSection }) {
+function WikiHome({ onOpenEntry, onOpenTimeline, onOpenSection, onOpenPCGallery, onOpenTales }) {
   const pool = useMemo(
     () => Object.values(CONTENT).flat().filter((e) => e && !e.codexHidden && e.lore),
     []
@@ -2399,6 +2441,22 @@ function WikiHome({ onOpenEntry, onOpenTimeline, onOpenSection }) {
         </span>
         <ChevronRight size={18} className="lgl-timeline-btn-arrow" />
       </button>
+      <button className="lgl-timeline-btn" onClick={onOpenPCGallery}>
+        <span className="lgl-timeline-btn-icon"><UserPlus size={26} /></span>
+        <span className="lgl-timeline-btn-text">
+          <span className="lgl-timeline-btn-label">Characters Made in Character Builder</span>
+          <span className="lgl-timeline-btn-sub">Every character the group has actually built and saved</span>
+        </span>
+        <ChevronRight size={18} className="lgl-timeline-btn-arrow" />
+      </button>
+      <button className="lgl-timeline-btn" onClick={onOpenTales}>
+        <span className="lgl-timeline-btn-icon"><Scroll size={26} /></span>
+        <span className="lgl-timeline-btn-text">
+          <span className="lgl-timeline-btn-label">Tales</span>
+          <span className="lgl-timeline-btn-sub">What your party has actually done, campaign by campaign</span>
+        </span>
+        <ChevronRight size={18} className="lgl-timeline-btn-arrow" />
+      </button>
       {pick && (
         <section className="lgl-randomblock">
           <div className="lgl-randomblock-head">
@@ -2422,13 +2480,12 @@ function WikiHome({ onOpenEntry, onOpenTimeline, onOpenSection }) {
 const WIKI_HOME = "__wikihome__";
 const WIKI_TIMELINE = "__timeline__";
 const WIKI_PCGALLERY = "__pcgallery__";
+const WIKI_TALES = "__tales__";
 
 function CharacterGallery() {
   const [rows, setRows] = useState([]);
   const [state, setState] = useState("idle"); // idle | loading | done | error
   const [openId, setOpenId] = useState(null);
-  const [filter, setFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     if (!SUPABASE_READY) { setState("not-configured"); return; }
@@ -2440,22 +2497,24 @@ function CharacterGallery() {
 
   const openRow = rows.find((r) => r.id === openId);
   const allCampaigns = [...CHARACTER_CAMPAIGNS, JUST_FOR_FUN];
-  const filterTabs = [{ id: "all", name: "All" }, ...allCampaigns];
 
-  const visibleRows = rows
-    .filter((r) => filter === "all" || r.data?.campaignId === filter)
-    .sort((a, b) => {
-      if (sortBy === "name") return (a.data?.name || "").localeCompare(b.data?.name || "");
-      if (sortBy === "owner") return (a.owner_name || "").localeCompare(b.owner_name || "");
-      return new Date(b.created_at) - new Date(a.created_at); // newest
-    });
+  const groups = [
+    ...allCampaigns.map((c) => ({
+      id: c.id, name: c.name,
+      rows: rows.filter((r) => r.data?.campaignId === c.id).sort((a, b) => (a.owner_name || "").localeCompare(b.owner_name || "") || (a.data?.name || "").localeCompare(b.data?.name || "")),
+    })),
+    {
+      id: "__uncategorized__", name: "No Campaign Set",
+      rows: rows.filter((r) => !allCampaigns.some((c) => c.id === r.data?.campaignId)).sort((a, b) => (a.owner_name || "").localeCompare(b.owner_name || "") || (a.data?.name || "").localeCompare(b.data?.name || "")),
+    },
+  ].filter((g) => g.rows.length > 0);
 
   return (
     <article className="lgl-entry wide lgl-centered">
       <header className="lgl-entry-head">
         <div className="lgl-eyebrow">Codex · Characters</div>
-        <h1>Player Characters</h1>
-        <p className="lgl-tagline">Every character the group has saved, sorted by where the party has actually seen them.</p>
+        <h1>Characters Made in Character Builder</h1>
+        <p className="lgl-tagline">Every character the group has saved, grouped by campaign and sorted by who made them.</p>
       </header>
 
       {state === "not-configured" && (
@@ -2468,42 +2527,20 @@ function CharacterGallery() {
 
       {(state === "done") && !openRow && (
         <>
-          <div className="lgl-subtabs" role="tablist" aria-label="Filter by campaign">
-            {filterTabs.map((c) => (
-              <button key={c.id} role="tab" aria-selected={filter === c.id} className={"lgl-subtab" + (filter === c.id ? " is-active" : "")} onClick={() => setFilter(c.id)}>{c.name}</button>
-            ))}
-          </div>
-          <div className="lgl-gallery-sort">
-            <label>
-              <span>Sort by</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="newest">Newest first</option>
-                <option value="name">Character name (A–Z)</option>
-                <option value="owner">Player (A–Z)</option>
-              </select>
-            </label>
-          </div>
-
           {rows.length === 0 && <p className="lgl-muted">Nobody's saved a character yet. Build one and it'll show up here.</p>}
-          {rows.length > 0 && visibleRows.length === 0 && <p className="lgl-muted">No characters tagged for this campaign yet.</p>}
-
-          {visibleRows.length > 0 && (
-            <div className="lgl-grid">
-              {visibleRows.map((row) => {
-                const campaign = allCampaigns.find((c) => c.id === row.data?.campaignId);
-                return (
-                  <button key={row.id} className="lgl-pick" onClick={() => setOpenId(row.id)}>
-                    <span className="lgl-card-name">{row.data?.name || "Unnamed"}</span>
-                    <span className="lgl-card-note">
-                      {CONTENT.races.find((r) => r.id === row.data?.raceId)?.name || "No race"} · {[...CLASSES, ...LOGLANDIA_CLASSES].find((c) => c.id === row.data?.classId)?.name || "No class"}
-                      <br />by {row.owner_name}
-                    </span>
-                    <span className="lgl-gallery-tag">{campaign ? campaign.name : "No campaign set"}</span>
+          {rows.length > 0 && groups.map((g) => (
+            <section className="lgl-chargroup" key={g.id}>
+              <div className="lgl-chargroup-label">{g.name}<span className="lgl-chargroup-count">{g.rows.length}</span></div>
+              <div className="lgl-bubbles">
+                {g.rows.map((row) => (
+                  <button key={row.id} className="lgl-charbubble" onClick={() => setOpenId(row.id)}>
+                    <span className="lgl-charbubble-name">{row.data?.name || "Unnamed"}</span>
+                    <span className="lgl-charbubble-player">by {row.owner_name || "someone"}</span>
                   </button>
-                );
-              })}
-            </div>
-          )}
+                ))}
+              </div>
+            </section>
+          ))}
         </>
       )}
 
@@ -2515,6 +2552,284 @@ function CharacterGallery() {
         </>
       )}
     </article>
+  );
+}
+
+/* ============================================ HEROES OF LOGLANDIA ========== */
+/* A personal, player-editable page per hero: portrait, an optional link to
+   a saved character sheet, a bio, and freeform sections the player adds
+   themselves. No login system — any of the trusted ~7 can edit any page,
+   but editing requires deliberately clicking into an edit mode first, so
+   browsing never risks an accidental change. */
+
+const DEFAULT_HERO_BLOCKS = [
+  { title: "Fun Facts", body: "" },
+  { title: "How I Built Them", body: "" },
+];
+
+function AvatarUpload({ value, onChange }) {
+  const [preview, setPreview] = useState(value || "");
+  const [state, setState] = useState("idle"); // idle | uploading | too-big | error
+  const inputRef = useRef(null);
+
+  useEffect(() => { setPreview(value || ""); }, [value]);
+
+  const pick = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // so picking the same file twice still fires onChange
+    if (!file) return;
+    if (file.size > HERO_IMAGE_MAX_MB * 1024 * 1024) { setState("too-big"); return; }
+    setPreview(URL.createObjectURL(file)); // instant local preview, before the upload finishes
+    setState("uploading");
+    try {
+      const url = await supaStorageUpload(HERO_BUCKET, file);
+      onChange(url);
+      setState("idle");
+    } catch {
+      setState("error");
+    }
+  };
+
+  return (
+    <div className="lgl-avatar-upload">
+      {preview ? <img src={preview} alt="" className="lgl-avatar-preview" /> : <div className="lgl-avatar-preview lgl-avatar-empty"><UserPlus size={28} /></div>}
+      <div className="lgl-avatar-upload-controls">
+        <button type="button" className="lgl-avatar-btn" onClick={() => inputRef.current?.click()} disabled={!SUPABASE_READY}>
+          {value ? "Change Portrait" : "Upload Portrait"}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*" hidden onChange={pick} />
+        {!SUPABASE_READY && <span className="lgl-avatar-status is-warn">Backend not configured yet.</span>}
+        {state === "uploading" && <span className="lgl-avatar-status">Uploading…</span>}
+        {state === "too-big" && <span className="lgl-avatar-status is-warn">That file's over {HERO_IMAGE_MAX_MB}MB — try a smaller one.</span>}
+        {state === "error" && <span className="lgl-avatar-status is-warn">Upload failed. Try again?</span>}
+      </div>
+    </div>
+  );
+}
+
+function HeroBlocksEditor({ blocks, setBlocks }) {
+  const update = (i, field, val) => setBlocks((bs) => bs.map((b, j) => (j === i ? { ...b, [field]: val } : b)));
+  const remove = (i) => setBlocks((bs) => bs.filter((_, j) => j !== i));
+  const move = (i, dir) => setBlocks((bs) => {
+    const j = i + dir;
+    if (j < 0 || j >= bs.length) return bs;
+    const next = [...bs];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  });
+  const add = () => setBlocks((bs) => [...bs, { title: "New Section", body: "" }]);
+
+  return (
+    <div className="lgl-heroblocks-edit">
+      {blocks.map((b, i) => (
+        <div className="lgl-heroblock-edit" key={i}>
+          <div className="lgl-heroblock-edit-head">
+            <input className="lgl-heroblock-title-input" value={b.title} onChange={(e) => update(i, "title", e.target.value)} placeholder="Section title" />
+            <div className="lgl-heroblock-edit-controls">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Move up">↑</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === blocks.length - 1} title="Move down">↓</button>
+              <button type="button" onClick={() => remove(i)} title="Remove this section" className="is-danger">✕</button>
+            </div>
+          </div>
+          <textarea className="lgl-heroblock-body-input" value={b.body} onChange={(e) => update(i, "body", e.target.value)} rows={4} placeholder="Write whatever you want here." />
+        </div>
+      ))}
+      <button type="button" className="lgl-heroblock-add" onClick={add}>+ Add a Section</button>
+    </div>
+  );
+}
+
+function HeroDetailPage({ hero, onBack, onSaved }) {
+  const [editing, setEditing] = useState(false);
+  const [savedId, setSavedId] = useState(hero.id);
+  const [playerName, setPlayerName] = useState(hero.player_name || "");
+  const [heroName, setHeroName] = useState(hero.hero_name || "");
+  const [avatarUrl, setAvatarUrl] = useState(hero.avatar_url || "");
+  const [bio, setBio] = useState(hero.bio || "");
+  const [blocks, setBlocks] = useState(hero.blocks?.length ? hero.blocks : DEFAULT_HERO_BLOCKS);
+  const [characterId, setCharacterId] = useState(hero.character_id || "");
+  const [myChars, setMyChars] = useState([]);
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | error
+
+  useEffect(() => {
+    if (!SUPABASE_READY || !playerName.trim()) { setMyChars([]); return; }
+    supaFetch(`characters?owner_name=eq.${encodeURIComponent(playerName.trim())}&select=id,data`)
+      .then((rows) => setMyChars(rows || []))
+      .catch(() => setMyChars([]));
+  }, [playerName]);
+
+  const linkedCharacter = myChars.find((c) => c.id === characterId);
+
+  const cancelEdit = () => {
+    setPlayerName(hero.player_name || "");
+    setHeroName(hero.hero_name || "");
+    setAvatarUrl(hero.avatar_url || "");
+    setBio(hero.bio || "");
+    setBlocks(hero.blocks?.length ? hero.blocks : DEFAULT_HERO_BLOCKS);
+    setCharacterId(hero.character_id || "");
+    setEditing(false);
+  };
+
+  const save = async () => {
+    setSaveState("saving");
+    try {
+      const payload = {
+        player_name: playerName.trim(),
+        hero_name: heroName.trim() || "Unnamed Hero",
+        avatar_url: avatarUrl,
+        bio,
+        blocks,
+        character_id: characterId || null,
+      };
+      if (savedId) {
+        await supaFetch(`heroes?id=eq.${savedId}`, { method: "PATCH", body: JSON.stringify(payload) });
+      } else {
+        const rows = await supaFetch("heroes", { method: "POST", body: JSON.stringify(payload) });
+        if (rows?.[0]?.id) setSavedId(rows[0].id);
+      }
+      hero.player_name = payload.player_name; hero.hero_name = payload.hero_name;
+      hero.avatar_url = payload.avatar_url; hero.bio = payload.bio;
+      hero.blocks = payload.blocks; hero.character_id = payload.character_id;
+      setSaveState("idle");
+      setEditing(false);
+      onSaved?.();
+    } catch {
+      setSaveState("error");
+    }
+  };
+
+  return (
+    <article className="lgl-entry wide lgl-centered lgl-hero-page">
+      <button className="lgl-backlink" onClick={onBack}><ChevronLeft size={14} /> All Heroes</button>
+
+      <div className="lgl-hero-editbar">
+        {!editing ? (
+          <button className="lgl-hero-editbtn" onClick={() => setEditing(true)}><Wrench size={13} /> Edit This Page</button>
+        ) : (
+          <div className="lgl-hero-editbar-actions">
+            <button className="lgl-hero-editbtn is-cancel" onClick={cancelEdit}>Cancel</button>
+            <button className="lgl-hero-editbtn is-save" onClick={save} disabled={saveState === "saving"}>{saveState === "saving" ? "Saving…" : "Save"}</button>
+          </div>
+        )}
+      </div>
+      {saveState === "error" && <div className="lgl-savenote is-warn">Couldn't save. Check your connection and try again.</div>}
+
+      {editing ? (
+        <div className="lgl-hero-edit">
+          <AvatarUpload value={avatarUrl} onChange={setAvatarUrl} />
+          <div className="lgl-hero-edit-row">
+            <label className="lgl-hero-edit-label">Hero's Name
+              <input value={heroName} onChange={(e) => setHeroName(e.target.value)} placeholder="Your character's name" />
+            </label>
+            <label className="lgl-hero-edit-label">Player
+              <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Your name" />
+            </label>
+          </div>
+          <label className="lgl-hero-edit-label">
+            Link a saved character (optional)
+            <select value={characterId} onChange={(e) => setCharacterId(e.target.value)}>
+              <option value="">— none —</option>
+              {myChars.map((c) => <option key={c.id} value={c.id}>{c.data?.name || "Unnamed"}</option>)}
+            </select>
+          </label>
+          <label className="lgl-hero-edit-label">
+            Bio
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} placeholder="A few lines about them." />
+          </label>
+          <HeroBlocksEditor blocks={blocks} setBlocks={setBlocks} />
+        </div>
+      ) : (
+        <>
+          <header className="lgl-entry-head">
+            {avatarUrl
+              ? <img src={avatarUrl} alt={heroName} className="lgl-art lgl-art-real" />
+              : <div className="lgl-art" aria-hidden="true"><span>no portrait yet</span></div>}
+            <h1>{heroName || "Unnamed Hero"}</h1>
+            <p className="lgl-tagline">Played by {playerName || "someone mysterious"}</p>
+          </header>
+          {bio && <p className="lgl-lore lgl-prewrap">{bio}</p>}
+          {linkedCharacter && (
+            <section className="lgl-block">
+              <h2 className="lgl-h2">Character Sheet</h2>
+              <CharacterSheet character={linkedCharacter.data} />
+            </section>
+          )}
+          {blocks.filter((b) => b.body?.trim()).map((b, i) => (
+            <section className="lgl-heroblock" key={i}>
+              <h2 className="lgl-h2">{b.title}</h2>
+              <p className="lgl-lore lgl-prewrap">{b.body}</p>
+            </section>
+          ))}
+        </>
+      )}
+    </article>
+  );
+}
+
+function HeroesModule() {
+  const [rows, setRows] = useState([]);
+  const [state, setState] = useState("idle"); // idle | loading | done | error
+  const [openId, setOpenId] = useState(null);
+
+  const load = () => {
+    if (!SUPABASE_READY) { setState("not-configured"); return; }
+    setState("loading");
+    supaFetch("heroes?select=*&order=created_at.desc")
+      .then((data) => { setRows(data || []); setState("done"); })
+      .catch(() => setState("error"));
+  };
+  useEffect(load, []);
+
+  const openRow = rows.find((r) => r.id === openId);
+
+  if (openId === "__new__" || openRow) {
+    const hero = openRow || { id: null, player_name: "", hero_name: "", avatar_url: "", bio: "", blocks: [], character_id: "" };
+    return (
+      <ModuleShell>
+        <HeroDetailPage hero={hero} onBack={() => { setOpenId(null); load(); }} onSaved={load} />
+      </ModuleShell>
+    );
+  }
+
+  return (
+    <ModuleShell>
+      <article className="lgl-entry wide lgl-centered">
+        <header className="lgl-entry-head">
+          <div className="lgl-eyebrow">Codex · Player Pages</div>
+          <h1>Heroes of Loglandia</h1>
+          <p className="lgl-tagline">Every hero the party has brought to life — pictures, sheets, and whatever else the player wants people to know.</p>
+        </header>
+
+        {state === "not-configured" && (
+          <div className="lgl-savenote" style={{ maxWidth: 480, margin: "0 auto" }}>
+            This isn't connected to a backend yet. Once Supabase is set up, hero pages saved here will show up for everyone.
+          </div>
+        )}
+        {state === "loading" && <p className="lgl-muted">Loading…</p>}
+        {state === "error" && <p className="lgl-muted">Couldn't load heroes just now. Try refreshing.</p>}
+
+        {state === "done" && (
+          <>
+            <button className="lgl-make-btn lgl-hero-addbtn" onClick={() => setOpenId("__new__")}>+ Add Your Hero</button>
+            {rows.length === 0 ? (
+              <p className="lgl-muted">Nobody's added a hero page yet. Be the first.</p>
+            ) : (
+              <div className="lgl-herogrid">
+                {rows.map((h) => (
+                  <button key={h.id} className="lgl-herocard" onClick={() => setOpenId(h.id)}>
+                    {h.avatar_url
+                      ? <img src={h.avatar_url} alt="" className="lgl-herocard-img" />
+                      : <div className="lgl-herocard-img lgl-herocard-img-empty"><UserPlus size={26} /></div>}
+                    <div className="lgl-herocard-name">{h.hero_name || "Unnamed Hero"}</div>
+                    <div className="lgl-herocard-player">played by {h.player_name || "someone"}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </article>
+    </ModuleShell>
   );
 }
 
@@ -2589,6 +2904,8 @@ function WikiModule({ params }) {
       <div className="lgl-nav-scroll">
         <button className={"lgl-nav-item lgl-nav-home" + (!selectedId && !sectionView ? " is-active" : "")} onClick={goHome}><BookOpen size={13} /> Codex Home</button>
         <button className={"lgl-nav-item lgl-nav-home" + (selectedId === WIKI_TIMELINE ? " is-active" : "")} onClick={() => openEntry(WIKI_TIMELINE)}><Clock size={13} /> Timeline</button>
+        <button className={"lgl-nav-item lgl-nav-home" + (selectedId === WIKI_PCGALLERY ? " is-active" : "")} onClick={() => openEntry(WIKI_PCGALLERY)}><UserPlus size={13} /> Characters Made in Character Builder</button>
+        <button className={"lgl-nav-item lgl-nav-home" + (selectedId === WIKI_TALES ? " is-active" : "")} onClick={() => openEntry(WIKI_TALES)}><Scroll size={13} /> Tales</button>
         {WIKI_SECTIONS.map((sec) => {
           const items = (CONTENT[sec.key] || []).filter((it) => !it.codexHidden).filter((it) => !q || it.name.toLowerCase().includes(q) || (it.tagline || "").toLowerCase().includes(q));
           if (q && items.length === 0) return null;
@@ -2608,11 +2925,6 @@ function WikiModule({ params }) {
               </button>
               {isOpen && (
                 <>
-                  {sec.key === "characters" && (
-                    <button className={"lgl-nav-item" + (selectedId === WIKI_PCGALLERY ? " is-active" : "")} onClick={() => openEntry(WIKI_PCGALLERY)}>
-                      Player Characters
-                    </button>
-                  )}
                   {items.length === 0 ? <div className="lgl-nav-empty">Coming soon</div> :
                     groups.map((g) => (
                       <div className="lgl-nav-subgroup" key={g.label || "all"}>
@@ -2639,9 +2951,10 @@ function WikiModule({ params }) {
       )}
       {selectedId === WIKI_TIMELINE ? <TimelineModule embedded />
         : selectedId === WIKI_PCGALLERY ? <CharacterGallery />
+        : selectedId === WIKI_TALES ? <TalesModule embedded />
         : selectedId ? <EntryPage entry={entry} onOpenEntry={openEntry} />
         : sectionView ? <SectionLanding sectionKey={sectionView} onOpenEntry={openEntry} />
-        : <WikiHome onOpenEntry={openEntry} onOpenTimeline={() => openEntry(WIKI_TIMELINE)} onOpenSection={openSection} />}
+        : <WikiHome onOpenEntry={openEntry} onOpenTimeline={() => openEntry(WIKI_TIMELINE)} onOpenSection={openSection} onOpenPCGallery={() => openEntry(WIKI_PCGALLERY)} onOpenTales={() => openEntry(WIKI_TALES)} />}
     </ModuleShell>
   );
 }
@@ -4013,38 +4326,36 @@ function TalesHome({ onOpen }) {
   );
 }
 
-function TalesModule() {
+function TalesModule({ embedded }) {
   const [active, setActive] = useState(TALES_HOME);
   const camp = CAMPAIGNS.find((c) => c.id === active);
-  if (!camp) return <ModuleShell><TalesHome onOpen={setActive} /></ModuleShell>;
-  return (
-    <ModuleShell>
-      <div className="lgl-entry wide">
-        <button className="lgl-backlink" onClick={() => setActive(TALES_HOME)}><ChevronLeft size={14} /> All campaigns</button>
-        <header className="lgl-entry-head">
-          <div className="lgl-eyebrow">Campaign Log</div>
-          <h1>{camp.name}</h1>
-          {camp.blurb && <p className="lgl-tagline">{camp.blurb}</p>}
-        </header>
-        <div className="lgl-tales-note">Live updates need a data source beyond the static build: a file you edit and redeploy, a Google Sheet the site reads, or a small backend with an entry form. We'll wire your pick in here.</div>
-        {camp.entries.length === 0 ? (
-          <div className="lgl-morecoming">More to come.</div>
-        ) : (
-          <div className="lgl-tales">
-            {camp.entries.map((t, i) => (
-              <div className="lgl-tale" key={i}>
-                {t.img && <img className="lgl-tale-img" src={t.img} alt="" />}
-                <div className="lgl-tale-stamp">{t.stamp}</div>
-                <div className="lgl-tale-title">{t.title}</div>
-                <div className="lgl-tale-body">{parseLore(t.body)}</div>
-              </div>
-            ))}
-          </div>
-        )}
-        <p className="lgl-muted">Each campaign is an object in <code>CAMPAIGNS</code>. Add a photo with an <code>img</code> URL on any entry.</p>
-      </div>
-    </ModuleShell>
+  const body = !camp ? <TalesHome onOpen={setActive} /> : (
+    <div className="lgl-entry wide">
+      <button className="lgl-backlink" onClick={() => setActive(TALES_HOME)}><ChevronLeft size={14} /> All campaigns</button>
+      <header className="lgl-entry-head">
+        <div className="lgl-eyebrow">Campaign Log</div>
+        <h1>{camp.name}</h1>
+        {camp.blurb && <p className="lgl-tagline">{camp.blurb}</p>}
+      </header>
+      <div className="lgl-tales-note">Live updates need a data source beyond the static build: a file you edit and redeploy, a Google Sheet the site reads, or a small backend with an entry form. We'll wire your pick in here.</div>
+      {camp.entries.length === 0 ? (
+        <div className="lgl-morecoming">More to come.</div>
+      ) : (
+        <div className="lgl-tales">
+          {camp.entries.map((t, i) => (
+            <div className="lgl-tale" key={i}>
+              {t.img && <img className="lgl-tale-img" src={t.img} alt="" />}
+              <div className="lgl-tale-stamp">{t.stamp}</div>
+              <div className="lgl-tale-title">{t.title}</div>
+              <div className="lgl-tale-body">{parseLore(t.body)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="lgl-muted">Each campaign is an object in <code>CAMPAIGNS</code>. Add a photo with an <code>img</code> URL on any entry.</p>
+    </div>
   );
+  return embedded ? body : <ModuleShell>{body}</ModuleShell>;
 }
 
 /* ===================================================== MODULE: HOME ======== */
@@ -4939,9 +5250,14 @@ const BURDEN_PAGES = [
 function FavoredSoulPage() {
   const d = FAVSOUL_DATA;
   const [burdenId, setBurdenId] = useState(null);
+  const burdensRef = useRef(null);
   useEffect(() => {
     document.querySelector(".lgl-main")?.scrollTo({ top: 0, behavior: "auto" });
   }, [burdenId]);
+
+  const jumpToBurdens = () => {
+    burdensRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   if (burdenId) {
     const page = BURDEN_PAGES.find((b) => b.id === burdenId);
@@ -4961,6 +5277,15 @@ function FavoredSoulPage() {
         <p className="lgl-tagline">A caster shaped by an involuntary divine bargain, between the versatility of a Warlock and the martial edge of a Paladin.</p>
       </header>
 
+      <button className="lgl-fs-jumpbtn" onClick={jumpToBurdens}>
+        <Dices size={22} className="lgl-fs-jumpbtn-icon" />
+        <span className="lgl-fs-jumpbtn-text">
+          <span className="lgl-fs-jumpbtn-label">Jump to Cosmic Burdens</span>
+          <span className="lgl-fs-jumpbtn-sub">Skip straight to the subclasses</span>
+        </span>
+        <ChevronRight size={20} className="lgl-fs-jumpbtn-arrow" />
+      </button>
+
       {d.intro.map((p, i) => <p className="lgl-fs-p" key={i}>{mdInline(p)}</p>)}
 
       <h2 className="lgl-fs-h2">The Favored Soul Table</h2>
@@ -4970,7 +5295,7 @@ function FavoredSoulPage() {
       {d.classFeaturesPreamble.map((p, i) => <p className="lgl-fs-p" key={i}>{mdInline(p)}</p>)}
       {d.classFeatures.map((f, i) => <FeatureCard feat={f} key={i} />)}
 
-      <h2 className="lgl-fs-h2">Cosmic Burdens</h2>
+      <h2 className="lgl-fs-h2" ref={burdensRef}>Cosmic Burdens</h2>
       <p className="lgl-fs-p">{mdInline(d.cosmicBurdens.intro)}</p>
       <div className="lgl-fs-burdengrid">
         {d.cosmicBurdens.items.map((it, i) => {
@@ -5163,8 +5488,8 @@ function CraftModule({ params }) {
 
 const HOME_CARDS = [
   { key: "wiki", label: "Codex", icon: BookOpen, desc: "Races, gods, regions, characters, and the timeline. Look anything up." },
+  { key: "heroes", label: "Heroes of Loglandia", icon: Swords, desc: "A page for every hero the party has brought to life — pictures, sheets, whatever you want on it." },
   { key: "map", label: "Map", icon: MapIcon, desc: "An interactive atlas. Click a region to delve into its lore." },
-  { key: "tales", label: "Tales", icon: Scroll, desc: "What your party has actually done, campaign by campaign." },
   { key: "mechanics", label: "New Rules", icon: Wrench, desc: "Legacy traits, house rules, and resurrection rules." },
   { key: "craft", label: "Harvesting & Crafting", icon: Anvil, desc: "Pull materials from the world, then turn them into gear." },
   { key: "glossary", label: "Glossary", icon: Puzzle, desc: "What the shorthand in every trait actually means." },
@@ -5203,8 +5528,8 @@ function HomeModule({ navigate }) {
 /* ------------------------------------------------------------ THE REGISTRY  */
 const MODULES = [
   { key: "wiki", label: "Codex", icon: BookOpen },
+  { key: "heroes", label: "Heroes of Loglandia", icon: Swords },
   { key: "map", label: "Map", icon: MapIcon },
-  { key: "tales", label: "Tales", icon: Scroll },
   { key: "mechanics", label: "New Rules", icon: Wrench },
   { key: "craft", label: "Harvesting & Crafting", icon: Anvil },
   { key: "glossary", label: "Glossary", icon: Puzzle },
@@ -5401,8 +5726,8 @@ export default function LoglandiaShell() {
         <NavContext.Provider value={navigate}>
           {mk === "home" && <HomeModule navigate={navigate} />}
           {mk === "wiki" && <WikiModule params={route.params} navigate={navigate} />}
+          {mk === "heroes" && <HeroesModule />}
           {mk === "map" && <MapModule navigate={navigate} />}
-          {mk === "tales" && <TalesModule />}
           {mk === "mechanics" && <MechanicsModule params={route.params} navigate={navigate} />}
           {mk === "craft" && <CraftModule params={route.params} />}
           {mk === "glossary" && <GlossaryModule />}
@@ -5570,6 +5895,56 @@ body{ display:block; place-items:unset; }
 /* Save & Post + My Characters */
 .lgl-savebox{ margin-top:34px; padding-top:24px; border-top:1px solid var(--line); text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
 .lgl-savenote{ font-size:13px; color:var(--mid); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:11px 16px; max-width:440px; }
+
+/* ---- Heroes of Loglandia ---- */
+.lgl-prewrap{ white-space:pre-wrap; }
+.lgl-hero-addbtn{ margin:0 auto 30px; display:block; }
+
+.lgl-herogrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px; }
+.lgl-herocard{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; padding:16px 14px; cursor:pointer; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:inherit; transition:transform .15s, border-color .15s, box-shadow .15s; }
+.lgl-herocard:hover{ transform:translateY(-3px); border-color:var(--accent); box-shadow:0 10px 26px -16px rgba(200,168,107,.6); }
+.lgl-herocard-img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; margin-bottom:8px; }
+.lgl-herocard-img-empty{ display:flex; align-items:center; justify-content:center; color:var(--faint); background:var(--elev); }
+.lgl-herocard-name{ font-family:var(--serif); font-size:15px; font-weight:700; color:var(--hi); }
+.lgl-herocard-player{ font-size:11.5px; color:var(--faint); }
+
+.lgl-hero-editbar{ display:flex; justify-content:center; margin:6px 0 20px; }
+.lgl-hero-editbtn{ display:inline-flex; align-items:center; gap:7px; padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--mid); font-size:12px; letter-spacing:.04em; cursor:pointer; }
+.lgl-hero-editbtn:hover{ border-color:var(--accent); color:var(--accent); }
+.lgl-hero-editbar-actions{ display:flex; gap:10px; }
+.lgl-hero-editbtn.is-save{ border-color:var(--accent); background:var(--accent-soft); color:var(--accent); font-weight:700; }
+.lgl-hero-editbtn.is-cancel{ color:var(--faint); }
+.lgl-hero-editbtn:disabled{ opacity:.5; cursor:default; }
+
+.lgl-hero-edit{ display:flex; flex-direction:column; gap:18px; max-width:480px; margin:0 auto; }
+.lgl-hero-edit-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.lgl-hero-edit-label{ display:flex; flex-direction:column; gap:6px; font-size:12px; letter-spacing:.04em; color:var(--faint); text-transform:uppercase; }
+.lgl-hero-edit-label input, .lgl-hero-edit-label select, .lgl-hero-edit-label textarea{ font-family:var(--sans); font-size:14px; text-transform:none; letter-spacing:normal; color:var(--hi); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:9px 12px; resize:vertical; }
+.lgl-hero-edit-label input:focus, .lgl-hero-edit-label select:focus, .lgl-hero-edit-label textarea:focus{ outline:none; border-color:var(--accent); }
+
+.lgl-avatar-upload{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+.lgl-avatar-preview{ width:140px; height:140px; border-radius:999px; object-fit:cover; border:1px solid var(--line); }
+.lgl-avatar-empty{ display:flex; align-items:center; justify-content:center; background:var(--elev); color:var(--faint); }
+.lgl-avatar-upload-controls{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.lgl-avatar-btn{ padding:8px 16px; border-radius:999px; border:1px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:12px; font-weight:600; cursor:pointer; }
+.lgl-avatar-btn:disabled{ opacity:.5; cursor:default; border-color:var(--line); background:none; color:var(--faint); }
+.lgl-avatar-status{ font-size:11.5px; color:var(--faint); }
+.lgl-avatar-status.is-warn{ color:#e0574f; }
+
+.lgl-heroblocks-edit{ display:flex; flex-direction:column; gap:14px; }
+.lgl-heroblock-edit{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); }
+.lgl-heroblock-edit-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.lgl-heroblock-title-input{ flex:1; font-family:var(--serif); font-weight:700; font-size:14px; background:none; border:none; border-bottom:1px solid var(--line); padding:4px 2px; color:var(--hi); }
+.lgl-heroblock-title-input:focus{ outline:none; border-bottom-color:var(--accent); }
+.lgl-heroblock-edit-controls{ display:flex; gap:4px; flex:0 0 auto; }
+.lgl-heroblock-edit-controls button{ width:26px; height:26px; border-radius:6px; border:1px solid var(--line); background:none; color:var(--faint); cursor:pointer; font-size:12px; }
+.lgl-heroblock-edit-controls button:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+.lgl-heroblock-edit-controls button:disabled{ opacity:.3; cursor:default; }
+.lgl-heroblock-edit-controls button.is-danger:hover{ border-color:#e0574f; color:#e0574f; }
+.lgl-heroblock-body-input{ width:100%; font-size:13.5px; }
+.lgl-heroblock-add{ align-self:center; padding:8px 18px; border-radius:999px; border:1px dashed var(--line); background:none; color:var(--faint); font-size:12.5px; cursor:pointer; }
+.lgl-heroblock-add:hover{ border-color:var(--accent); color:var(--accent); }
+.lgl-heroblock{ margin-top:26px; }
 .lgl-savenote.is-ok{ color:#8fd19e; background:rgba(143,209,158,.10); border-color:rgba(143,209,158,.3); }
 .lgl-savenote.is-warn{ color:var(--accent); background:var(--accent-soft); }
 .lgl-mychars{ margin-top:30px; padding-top:22px; border-top:1px solid var(--line); }
@@ -5594,6 +5969,14 @@ body{ display:block; place-items:unset; }
 .lgl-logpendium-box{ margin-top:28px; padding:28px 22px; border-radius:14px; background:var(--surface); border:1px solid var(--line); text-align:center; display:flex; flex-direction:column; align-items:center; gap:18px; }
 .lgl-logpendium-btn{ display:inline-flex; text-decoration:none; border-radius:14px; overflow:hidden; position:relative; }
 .lgl-logpendium-btn-inner{ display:flex; align-items:center; gap:12px; padding:16px 36px; font-size:16px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--bg); background:linear-gradient(135deg, #E8C87A 0%, #C8A86B 40%, #A07840 70%, #C8A86B 100%); background-size:200% 200%; animation:lgl-logp-shimmer 2.5s ease infinite; border-radius:14px; font-family:var(--serif); }
+.lgl-fs-jumpbtn{ display:flex; align-items:center; gap:18px; width:100%; margin:22px 0 32px; padding:22px 30px; cursor:pointer; border:none; border-radius:16px; background:linear-gradient(135deg, #E8C87A 0%, #C8A86B 40%, #A07840 70%, #C8A86B 100%); background-size:200% 200%; animation:lgl-logp-shimmer 3s ease infinite; box-shadow:0 14px 34px -14px rgba(200,168,107,.65); transition:transform .18s ease, box-shadow .18s ease; }
+.lgl-fs-jumpbtn:hover{ transform:translateY(-3px); box-shadow:0 18px 40px -12px rgba(200,168,107,.8); }
+.lgl-fs-jumpbtn-icon{ flex:0 0 auto; color:var(--bg); animation:lgl-pulse 2s ease-in-out infinite; }
+.lgl-fs-jumpbtn-text{ flex:1; display:flex; flex-direction:column; gap:2px; text-align:left; }
+.lgl-fs-jumpbtn-label{ font-family:var(--serif); font-size:19px; font-weight:700; letter-spacing:.03em; color:var(--bg); }
+.lgl-fs-jumpbtn-sub{ font-size:12.5px; color:rgba(22,22,26,.72); font-style:italic; }
+.lgl-fs-jumpbtn-arrow{ flex:0 0 auto; color:var(--bg); transition:transform .18s ease; }
+.lgl-fs-jumpbtn:hover .lgl-fs-jumpbtn-arrow{ transform:translateX(4px); }
 .lgl-logpendium-btn:hover .lgl-logpendium-btn-inner{ filter:brightness(1.1); transform:scale(1.02); }
 .lgl-logpendium-star{ opacity:.8; }
 .lgl-logpendium-star-l{ animation:lgl-pulse 1.8s ease-in-out infinite; }
@@ -5713,6 +6096,13 @@ body{ display:block; place-items:unset; }
 .lgl-bubblegroup-label{ display:flex; align-items:center; justify-content:center; gap:8px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:14px; }
 .lgl-bubblegroup-count{ font-size:10px; color:var(--faint); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:1px 8px; letter-spacing:.04em; }
 .lgl-bubbles{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+.lgl-chargroup{ margin-bottom:30px; }
+.lgl-chargroup-label{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--serif); font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+.lgl-chargroup-count{ font-size:10px; color:var(--faint); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:1px 8px; letter-spacing:.02em; text-transform:none; }
+.lgl-charbubble{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 20px; border-radius:999px; border:1px solid var(--line); background:var(--surface); cursor:pointer; transition:border-color .15s, background .15s, transform .15s; }
+.lgl-charbubble:hover{ border-color:var(--accent); background:var(--accent-soft); transform:translateY(-2px); }
+.lgl-charbubble-name{ font-family:var(--serif); font-size:14.5px; font-weight:700; color:var(--hi); }
+.lgl-charbubble-player{ font-size:11px; color:var(--faint); }
 .lgl-bubble{ display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--hi); cursor:pointer; font-family:var(--serif); font-size:14.5px; transition:border-color .15s, background .15s, transform .15s, color .15s; }
 .lgl-bubble:hover{ border-color:var(--accent); background:var(--accent-soft); color:var(--accent); transform:translateY(-2px); }
 
