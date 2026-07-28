@@ -5507,7 +5507,7 @@ body{ display:block; place-items:unset; }
 .lgl-entry h1{ font-family:var(--serif); font-weight:600; font-size:52px; line-height:1.04; margin:0; letter-spacing:-.01em; }
 .lgl-tagline{ font-family:var(--serif); font-style:italic; font-size:19px; color:var(--mid); margin:14px 0 0; }
 .lgl-art{ height:200px; border:1px solid var(--line); border-radius:10px; background:repeating-linear-gradient(135deg, transparent 0 22px, rgba(255,255,255,.012) 22px 44px), linear-gradient(180deg, var(--elev), var(--surface)); display:flex; align-items:center; justify-content:center; margin-bottom:28px; }
-.lgl-art-real{ display:block; height:auto; max-height:480px; width:100%; object-fit:contain; object-position:center; background:linear-gradient(180deg, var(--elev), var(--surface)); border:1px solid var(--line); border-radius:10px; }
+.lgl-art-real{ display:block; width:auto; max-width:100%; height:auto; max-height:480px; margin:0 auto 28px; object-fit:contain; background:none; border:none; border-radius:0; filter:drop-shadow(0 0 1px rgba(255,255,255,.3)) drop-shadow(0 0 1px rgba(255,255,255,.3)) drop-shadow(0 10px 22px rgba(0,0,0,.55)); }
 .lgl-art span{ font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--faint); }
 .lgl-lore{ font-size:17px; color:var(--hi); margin:0 0 22px; }
 .lgl-facts{ margin:0 0 26px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
