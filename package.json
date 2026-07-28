@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:quick": "npm run build",
+    "deploy:save": "git add . && git commit -m \"update site\""
   },
   "dependencies": {
     "react": "^18.3.1",

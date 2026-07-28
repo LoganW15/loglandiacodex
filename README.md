@@ -28,6 +28,19 @@ click through the whole site before deploying anything.
 
 Netlify deploys best from a Git repo (auto-redeploys every time you push).
 
+The Supabase credentials are wired directly into `src/LoglandiaShell.jsx`, so no extra build-time secrets are required for deployment.
+
+## Fastest update workflow
+
+This setup is designed for the simplest possible loop:
+
+1. Edit the React/JSX files and any images in the project.
+2. Run `npm run build` locally to confirm everything still compiles.
+3. Commit and push the changes to GitHub.
+4. Netlify automatically detects the push and redeploys the site.
+
+No `.env` files or extra deployment secret setup are needed.
+
     cd loglandia-site
     git init
     git add .

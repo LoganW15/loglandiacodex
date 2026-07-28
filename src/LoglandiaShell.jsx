@@ -16,10 +16,8 @@ const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='
    PLAYER CHARACTERS — lightweight backend
    ----------------------------------------------------------------------------
    No real accounts, just a name (per the call: only 7 trusted people use this).
-   Reads credentials from environment variables (VITE_SUPABASE_URL,
-   VITE_SUPABASE_ANON_KEY) — see .env.example. Until they're set,
-   SUPABASE_READY stays false and Save/the gallery show a friendly setup notice
-   instead of crashing.
+   Supabase credentials are wired directly here so the deployed site can use the
+   same values without any build-time environment setup.
 
    Supabase table to create (SQL editor):
      create table characters (
@@ -33,9 +31,9 @@ const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='
      create policy "public insert" on characters for insert with check (true);
      create policy "public update" on characters for update using (true);
    ========================================================================== */
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
-const SUPABASE_READY = !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
+const SUPABASE_URL = "https://ronzvhxkeyesdkeuavlp.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_wzEfg5BBoC9_913zZ9i94w_Q0dBlNcT";
+const SUPABASE_READY = true;
 
 async function supaFetch(path, opts = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
