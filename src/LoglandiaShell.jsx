@@ -1134,6 +1134,7 @@ const CONTENT = {
 
   characters: [
     { id: "lucan", name: "Lucan", eyebrow: "Character · The Dawn Hunt",
+      img: "/images/lucan.png",
       tagline: "\"the Dawn Feather\"",
       lore: "Lucan never folds his wings away, and hunters half a head taller than him still stand up when he walks past. Meet him once and he has your name for good, along with the town you rode in from and the drink you ordered. New hunters keep looking for the catch in all that warmth. The old ones could tell them there isn't one.",
       facts: [
@@ -1149,6 +1150,7 @@ const CONTENT = {
         { label: "Players know", text: "At first, a beloved, charismatic winged guildmaster who founded the Dawn Hunt and runs the best hall in Kingsmont. The chipped wing is visible. The story of how isn't offered unless someone asks, and even then he tells it light." },
       ] },
     { id: "emrin", name: "Emrin", eyebrow: "Character · The Dawn Hunt",
+      img: "/images/emrin.png",
       tagline: "\"the Feather's Ledger\"",
       lore: "Emrin has his father's wings. On him they mostly get in the way of the desk. He runs the boards Lucan is too warm to run himself, and if a contract's pay is wrong, he's the one who tells you, without softening it. Hunters come to like him slower than they like Lucan, and trust him faster: Lucan tells you the hunt will go fine, Emrin tells you what it pays and what it's killed before.",
       facts: [
@@ -1166,6 +1168,7 @@ const CONTENT = {
         { label: "Players know", text: "The guildmaster's sharp, bookish son who runs the desk and doesn't sugarcoat. That he chose the ledger over the wing on purpose isn't something he talks about." },
       ] },
     { id: "tatsumi", name: "Tatsumi", eyebrow: "Character · Adventurer",
+      img: "/images/tatsumi.png",
       tagline: "\"the Bolt of Shirokane\"",
       lore: "Every child in Shirokane grows up worshipping Meirlach the Dragon Master. Only his followers call him Musashi, and Tatsumi has never once called him anything else. The other children worshipped and grew out of it. She imitated him, studied his swordsmanship, and never stopped. Her father is a blue Drakel who carried messages between Shirokane and Vaelrath, the dragon plane, and from him she gets her innate speed and the small stock of manners she has. She is young and loud, and she bows very correctly before she asks the biggest man in the room for a sparring match. Then, before you have registered that it began, she is across the floor and cutting at you.",
       facts: [
@@ -1184,6 +1187,7 @@ const CONTENT = {
         { label: "Players know", text: "A loud, friendly, absurdly quick duelist from Tenkyra, proud of her Drakel father, following the Way of Musashi. She will tell anyone who stands still that she is hunting her god's lost swords, and most people find this charming and none of them help. Everyone calls her the Bolt of Shirokane. What nobody quite registers is that when she says she was slow, she means it." },
       ] },
     { id: "mylo", name: "Aurelio II", eyebrow: "Character · Adventurer",
+      img: "/images/mylo.png",
       tagline: "\"the Sun Blooded\"",
       lore: "He comes in unhurried, grinning, already sure the day is going to go his way. Red hair, one eye, a chest full of scars, and he will tell you the story behind any of them, though the stories get better every year. When the crowds call him kin to the great Sun Elf general he just laughs. He is obviously human. It has never once hurt ticket sales.",
       facts: [
@@ -1205,6 +1209,7 @@ const CONTENT = {
         { label: "Players know", text: "The undefeated champion of Pyrra. Red-haired, one-eyed, loud, generous, hard not to like. Called the Sun Blooded, rumored kin to the great Sun Elf general, plainly human. Prays to Mortuous. Tells anyone who asks that he wants out of the pits and into a war." },
       ] },
     { id: "amenza", name: "Amenza", eyebrow: "Character · Adventurer",
+      img: "/images/amenza.png",
       tagline: "\"the Grasping\" — a name she took for herself, not one anyone gave her",
       lore: "She keeps the lower half of her face veiled, and most people never learn the rest. Silver hair, light purple eyes, a spiked chain coiled somewhere in reach. She is courteous, quiet, and forgettable on purpose. It slips in two places. Near anything gilded, a noble's carriage, a temple door, a rich man's coat, the envy shows in her eyes before she can school them. And she moves like a dancer whether she means to or not. On the rare night she lets herself dance, strangers stop to watch.",
       facts: [
@@ -1222,6 +1227,7 @@ const CONTENT = {
         { label: "Players know", text: "A veiled, silver-haired woman who turns up where there's dangerous work and disappears once it's done. Dangerous with a chain. Gives her name to almost no one. Nothing about a prince, a princess, or a brothel. Nothing about being anyone's twin." },
       ] },
     { id: "amariel", name: "Amariel", eyebrow: "Character · Kingsmont",
+      img: "/images/amariel.png",
       tagline: "\"the beloved of Kingsmont\"",
       lore: "Amariel enters a room and the room reorganizes around her without seeming to notice it's done so. Warm and open-faced, nothing veiled about her at all. Her hair is court black from a bottle, and between sittings with the dye, the roots come in red. She remembers everyone's name, touches an arm when she says it, and men who have served the crown thirty years catch themselves hoping she remembers them fondly. When there's a ball she dances until the musicians tire first. She is exactly as warm as she seems, and that is the unsettling part.",
       facts: [
@@ -1237,6 +1243,7 @@ const CONTENT = {
         { label: "Players know", text: "The beloved princess of Kingsmont, third in line, unmarried, adored by everyone who meets her. Nothing about a brothel. Nothing about a sister." },
       ] },
     { id: "setsariel", name: "Setsariel", eyebrow: "Character · Adventurer",
+      img: "/images/setsariel.png",
       tagline: "\"Setsu\" — the formal name is his mother's; everyone who likes him shortens it",
       lore: "Setsu is tall, lanky, and forever apologizing for things that need no apology. Strangers see the white fox ears, the three tails, and decide he is a Byakko, an omen made flesh, and he has spent his whole life gently explaining that he cannot read anyone's future, his mother is simply an elf from the snow country. He answers questions in a soft, precise voice, knows more than he ever volunteers, and given a quiet hour will fold himself into fox form beside the fire with a book propped against his own tails.",
       facts: [
@@ -1256,6 +1263,7 @@ const CONTENT = {
         { label: "Players know", text: "A polite white-furred Kitsune scholar from the north, staying at the Feather, deep in some research he's vague about. Friendly with Tatsumi. Probably a Byakko, people say, no matter how many times he says otherwise." },
       ] },
     { id: "ferrin-fell", name: "Ferrin Fell", eyebrow: "Character · Adventurer",
+      img: "/images/ferrin.png",
       tagline: "the coast calls him Salt-Tongue, and he's never once corrected them",
       lore: "Ferrin leans before he stands, unhurried in a way that makes everyone around him relax without noticing they've done it. He tells you a story and you believe you talked him into it. Ask what the tattoo across his chest means and the ease slips for exactly one second before he finds it again and changes the subject with a joke you'll repeat for a week. He has never once made you a promise. He has also never once lied to you. Working out which is happening in any given conversation is most of his charm.",
       facts: [
@@ -1274,6 +1282,7 @@ const CONTENT = {
         { label: "Players know", text: "A charming Sea Elf bard working the coast, quick with a story, quicker with a favor. Devout to Kai Foschunn and openly contemptuous of Ilsrabae, which most people write off as a sailor's grudge. Nobody knows about the hoard." },
       ] },
     { id: "duro", name: "Duro", eyebrow: "Character · Pyrra",
+      img: "/images/duro.png",
       tagline: "\"the Blazing Berserker\"",
       lore: "Duro is big, warm, and not the sharpest man in any room, and it has never once bothered him. He solves most problems with his hands and the rest with a grin. He carries one thing besides himself: a small blackened cold-iron kettle, the one material his fire respects, and making tea on his own palm is the first trick he shows anyone new. Loves fire the way sailors love the sea. Loves a good fight the same way. Loves people almost as much as both.",
       facts: [
