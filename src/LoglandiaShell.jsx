@@ -68,12 +68,30 @@ async function supaFetch(path, opts = {}) {
        bio text,
        blocks jsonb default '[]'::jsonb,
        character_id uuid,
+       race_text text,
+       class_text text,
+       quote text,
+       status text,
+       color text,
+       bonds jsonb default '[]'::jsonb,
+       gods_followed jsonb default '[]'::jsonb,
        created_at timestamptz default now()
      );
      alter table heroes enable row level security;
      create policy "public read" on heroes for select using (true);
      create policy "public insert" on heroes for insert with check (true);
      create policy "public update" on heroes for update using (true);
+
+   If the table already exists live (it does, as of the Aug 2026 deploy),
+   run this migration instead of the create table above:
+     alter table heroes
+       add column if not exists race_text text,
+       add column if not exists class_text text,
+       add column if not exists quote text,
+       add column if not exists status text,
+       add column if not exists color text,
+       add column if not exists bonds jsonb default '[]'::jsonb,
+       add column if not exists gods_followed jsonb default '[]'::jsonb;
    ========================================================================== */
 const HERO_BUCKET = "hero-portraits";
 const HERO_IMAGE_MAX_MB = 5;
@@ -2648,7 +2666,16 @@ function HeroBlocksEditor({ blocks, setBlocks }) {
   );
 }
 
-function HeroDetailPage({ hero, onBack, onSaved }) {
+const HERO_COLORS = [
+  { name: "Gold", hex: "#C8A86B" },
+  { name: "Crimson", hex: "#a8524a" },
+  { name: "Storm Blue", hex: "#3f5a8a" },
+  { name: "Forest", hex: "#5f9146" },
+  { name: "Amethyst", hex: "#8a6fc9" },
+  { name: "Teal", hex: "#3a8a8a" },
+];
+
+function HeroDetailPage({ hero, allHeroes, onBack, onSaved, onOpenHero }) {
   const [editing, setEditing] = useState(false);
   const [savedId, setSavedId] = useState(hero.id);
   const [playerName, setPlayerName] = useState(hero.player_name || "");
@@ -2657,6 +2684,13 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
   const [bio, setBio] = useState(hero.bio || "");
   const [blocks, setBlocks] = useState(hero.blocks?.length ? hero.blocks : DEFAULT_HERO_BLOCKS);
   const [characterId, setCharacterId] = useState(hero.character_id || "");
+  const [raceText, setRaceText] = useState(hero.race_text || "");
+  const [classText, setClassText] = useState(hero.class_text || "");
+  const [quote, setQuote] = useState(hero.quote || "");
+  const [status, setStatus] = useState(hero.status || "");
+  const [color, setColor] = useState(hero.color || HERO_COLORS[0].hex);
+  const [bonds, setBonds] = useState(hero.bonds || []);
+  const [godsFollowed, setGodsFollowed] = useState(hero.gods_followed || []);
   const [myChars, setMyChars] = useState([]);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | error
 
@@ -2669,6 +2703,20 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
 
   const linkedCharacter = myChars.find((c) => c.id === characterId);
 
+  const pickCharacter = (id) => {
+    setCharacterId(id);
+    const c = myChars.find((c) => c.id === id);
+    if (c && !raceText && !classText) {
+      const r = CONTENT.races.find((r) => r.id === c.data?.raceId);
+      const cl = [...CLASSES, ...LOGLANDIA_CLASSES].find((cl) => cl.id === c.data?.classId);
+      if (r) setRaceText(r.name);
+      if (cl) setClassText(cl.name);
+    }
+  };
+
+  const toggleBond = (id) => setBonds((bs) => (bs.includes(id) ? bs.filter((b) => b !== id) : [...bs, id]));
+  const toggleGod = (id) => setGodsFollowed((gs) => (gs.includes(id) ? gs.filter((g) => g !== id) : [...gs, id]));
+
   const cancelEdit = () => {
     setPlayerName(hero.player_name || "");
     setHeroName(hero.hero_name || "");
@@ -2676,6 +2724,13 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
     setBio(hero.bio || "");
     setBlocks(hero.blocks?.length ? hero.blocks : DEFAULT_HERO_BLOCKS);
     setCharacterId(hero.character_id || "");
+    setRaceText(hero.race_text || "");
+    setClassText(hero.class_text || "");
+    setQuote(hero.quote || "");
+    setStatus(hero.status || "");
+    setColor(hero.color || HERO_COLORS[0].hex);
+    setBonds(hero.bonds || []);
+    setGodsFollowed(hero.gods_followed || []);
     setEditing(false);
   };
 
@@ -2689,6 +2744,13 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
         bio,
         blocks,
         character_id: characterId || null,
+        race_text: raceText,
+        class_text: classText,
+        quote,
+        status,
+        color,
+        bonds,
+        gods_followed: godsFollowed,
       };
       if (savedId) {
         await supaFetch(`heroes?id=eq.${savedId}`, { method: "PATCH", body: JSON.stringify(payload) });
@@ -2696,9 +2758,7 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
         const rows = await supaFetch("heroes", { method: "POST", body: JSON.stringify(payload) });
         if (rows?.[0]?.id) setSavedId(rows[0].id);
       }
-      hero.player_name = payload.player_name; hero.hero_name = payload.hero_name;
-      hero.avatar_url = payload.avatar_url; hero.bio = payload.bio;
-      hero.blocks = payload.blocks; hero.character_id = payload.character_id;
+      Object.assign(hero, payload);
       setSaveState("idle");
       setEditing(false);
       onSaved?.();
@@ -2707,8 +2767,12 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
     }
   };
 
+  const otherHeroes = (allHeroes || []).filter((h) => h.id && h.id !== savedId);
+  const bondedHeroes = otherHeroes.filter((h) => bonds.includes(h.id));
+  const followedGods = godsFollowed.map((id) => CONTENT.gods.find((g) => g.id === id)).filter(Boolean);
+
   return (
-    <article className="lgl-entry wide lgl-centered lgl-hero-page">
+    <article className="lgl-entry wide lgl-centered lgl-hero-page" style={{ "--hero-color": color }}>
       <button className="lgl-backlink" onClick={onBack}><ChevronLeft size={14} /> All Heroes</button>
 
       <div className="lgl-hero-editbar">
@@ -2736,27 +2800,116 @@ function HeroDetailPage({ hero, onBack, onSaved }) {
           </div>
           <label className="lgl-hero-edit-label">
             Link a saved character (optional)
-            <select value={characterId} onChange={(e) => setCharacterId(e.target.value)}>
+            <select value={characterId} onChange={(e) => pickCharacter(e.target.value)}>
               <option value="">— none —</option>
               {myChars.map((c) => <option key={c.id} value={c.id}>{c.data?.name || "Unnamed"}</option>)}
             </select>
+          </label>
+          <div className="lgl-hero-edit-row">
+            <label className="lgl-hero-edit-label">Race
+              <input value={raceText} onChange={(e) => setRaceText(e.target.value)} placeholder="e.g. Sea Elf" />
+            </label>
+            <label className="lgl-hero-edit-label">Class
+              <input value={classText} onChange={(e) => setClassText(e.target.value)} placeholder="e.g. Bard" />
+            </label>
+          </div>
+          <label className="lgl-hero-edit-label">
+            Status
+            <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Currently: exploring the Underdark" maxLength={80} />
+          </label>
+          <label className="lgl-hero-edit-label">
+            Signature Quote
+            <input value={quote} onChange={(e) => setQuote(e.target.value)} placeholder="Something they'd actually say." />
           </label>
           <label className="lgl-hero-edit-label">
             Bio
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} placeholder="A few lines about them." />
           </label>
+          <label className="lgl-hero-edit-label">
+            Accent Color
+            <div className="lgl-hero-colorrow">
+              {HERO_COLORS.map((c) => (
+                <button
+                  type="button"
+                  key={c.hex}
+                  className={"lgl-hero-swatch" + (color === c.hex ? " is-active" : "")}
+                  style={{ "--swatch": c.hex }}
+                  onClick={() => setColor(c.hex)}
+                  title={c.name}
+                />
+              ))}
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="lgl-hero-colorpick" title="Custom color" />
+            </div>
+          </label>
+
+          {otherHeroes.length > 0 && (
+            <label className="lgl-hero-edit-label">
+              Party Bonds — connect to other heroes
+              <div className="lgl-hero-checklist">
+                {otherHeroes.map((h) => (
+                  <label key={h.id} className="lgl-hero-checkitem">
+                    <input type="checkbox" checked={bonds.includes(h.id)} onChange={() => toggleBond(h.id)} />
+                    {h.hero_name || "Unnamed Hero"} <span className="lgl-hero-checkitem-sub">by {h.player_name}</span>
+                  </label>
+                ))}
+              </div>
+            </label>
+          )}
+
+          <label className="lgl-hero-edit-label">
+            Gods Followed
+            <div className="lgl-hero-checklist">
+              {CONTENT.gods.filter((g) => !g.planned && !g.codexHidden).map((g) => (
+                <label key={g.id} className="lgl-hero-checkitem">
+                  <input type="checkbox" checked={godsFollowed.includes(g.id)} onChange={() => toggleGod(g.id)} />
+                  {g.name}
+                </label>
+              ))}
+            </div>
+          </label>
+
           <HeroBlocksEditor blocks={blocks} setBlocks={setBlocks} />
         </div>
       ) : (
         <>
           <header className="lgl-entry-head">
             {avatarUrl
-              ? <img src={avatarUrl} alt={heroName} className="lgl-art lgl-art-real" />
+              ? <img src={avatarUrl} alt={heroName} className="lgl-art lgl-art-real lgl-hero-avatar-real" />
               : <div className="lgl-art" aria-hidden="true"><span>no portrait yet</span></div>}
             <h1>{heroName || "Unnamed Hero"}</h1>
+            {(raceText || classText) && <p className="lgl-hero-raceclass">{[raceText, classText].filter(Boolean).join(" · ")}</p>}
             <p className="lgl-tagline">Played by {playerName || "someone mysterious"}</p>
+            {quote && <p className="lgl-hero-quote">“{quote}”</p>}
+            {status && <div className="lgl-hero-status">{status}</div>}
           </header>
           {bio && <p className="lgl-lore lgl-prewrap">{bio}</p>}
+
+          {(bondedHeroes.length > 0 || followedGods.length > 0) && (
+            <div className="lgl-hero-links-row">
+              {bondedHeroes.length > 0 && (
+                <div className="lgl-hero-linkgroup">
+                  <div className="lgl-hero-linkgroup-label">Party Bonds</div>
+                  <div className="lgl-bubbles">
+                    {bondedHeroes.map((h) => (
+                      <button key={h.id} className="lgl-charbubble" onClick={() => onOpenHero(h.id)}>
+                        <span className="lgl-charbubble-name">{h.hero_name || "Unnamed Hero"}</span>
+                        <span className="lgl-charbubble-player">by {h.player_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {followedGods.length > 0 && (
+                <div className="lgl-hero-linkgroup">
+                  <div className="lgl-hero-linkgroup-label">Gods Followed</div>
+                  <div className="lgl-bubbles">
+                    {followedGods.map((g) => <LoreLink key={g.id} linkKey={g.id}>{g.name}</LoreLink>)}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {linkedCharacter && (
             <section className="lgl-block">
               <h2 className="lgl-h2">Character Sheet</h2>
@@ -2795,7 +2948,7 @@ function HeroesModule() {
     const hero = openRow || { id: null, player_name: "", hero_name: "", avatar_url: "", bio: "", blocks: [], character_id: "" };
     return (
       <ModuleShell>
-        <HeroDetailPage hero={hero} onBack={() => { setOpenId(null); load(); }} onSaved={load} />
+        <HeroDetailPage hero={hero} allHeroes={rows} onBack={() => { setOpenId(null); load(); }} onSaved={load} onOpenHero={(id) => setOpenId(id)} />
       </ModuleShell>
     );
   }
@@ -2825,7 +2978,7 @@ function HeroesModule() {
             ) : (
               <div className="lgl-herogrid">
                 {rows.map((h) => (
-                  <button key={h.id} className="lgl-herocard" onClick={() => setOpenId(h.id)}>
+                  <button key={h.id} className="lgl-herocard" style={{ "--hero-color": h.color || "var(--accent)" }} onClick={() => setOpenId(h.id)}>
                     {h.avatar_url
                       ? <img src={h.avatar_url} alt="" className="lgl-herocard-img" />
                       : <div className="lgl-herocard-img lgl-herocard-img-empty"><UserPlus size={26} /></div>}
@@ -5929,6 +6082,35 @@ body{ display:block; place-items:unset; }
 .lgl-hero-edit-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .lgl-hero-edit-label{ display:flex; flex-direction:column; gap:6px; font-size:12px; letter-spacing:.04em; color:var(--faint); text-transform:uppercase; }
 .lgl-hero-edit-label input, .lgl-hero-edit-label select, .lgl-hero-edit-label textarea{ font-family:var(--sans); font-size:14px; text-transform:none; letter-spacing:normal; color:var(--hi); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:9px 12px; resize:vertical; }
+
+/* ---- Hero accent color theming ---- */
+.lgl-hero-page{ --hero-color: var(--accent); }
+.lgl-hero-page .lgl-hero-avatar-real{ border-color:var(--hero-color) !important; box-shadow:0 0 0 1px var(--hero-color), 0 10px 22px -10px var(--hero-color) !important; filter:drop-shadow(0 0 1px var(--hero-color)) drop-shadow(0 0 1px var(--hero-color)) drop-shadow(0 10px 22px -10px var(--hero-color)); }
+.lgl-hero-editbtn.is-save{ border-color:var(--hero-color); background:color-mix(in srgb, var(--hero-color) 14%, transparent); color:var(--hero-color); }
+.lgl-herocard{ border-top:3px solid var(--hero-color); }
+.lgl-herocard:hover{ box-shadow:0 10px 26px -16px var(--hero-color); }
+
+/* ---- Race/class, quote, status ---- */
+.lgl-hero-raceclass{ font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hero-color); font-weight:600; margin:2px 0 0; }
+.lgl-hero-quote{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--hi); max-width:46ch; margin:10px auto 0; }
+.lgl-hero-status{ display:inline-flex; margin-top:10px; padding:4px 14px; border-radius:999px; border:1px solid var(--hero-color); background:color-mix(in srgb, var(--hero-color) 12%, transparent); color:var(--hero-color); font-size:11.5px; font-weight:600; letter-spacing:.03em; }
+
+/* ---- Color picker ---- */
+.lgl-hero-colorrow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.lgl-hero-swatch{ width:28px; height:28px; border-radius:999px; border:2px solid transparent; background:var(--swatch); cursor:pointer; padding:0; transition:transform .12s, border-color .12s; }
+.lgl-hero-swatch:hover{ transform:scale(1.1); }
+.lgl-hero-swatch.is-active{ border-color:var(--hi); box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--hi); }
+.lgl-hero-colorpick{ width:30px; height:30px; padding:0; border:1px solid var(--line); border-radius:8px; background:none; cursor:pointer; }
+
+/* ---- Checklists (Party Bonds, Gods Followed) ---- */
+.lgl-hero-checklist{ display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.lgl-hero-checkitem{ display:flex; align-items:center; gap:8px; font-size:13px; text-transform:none; letter-spacing:normal; color:var(--mid); cursor:pointer; }
+.lgl-hero-checkitem input{ width:auto; }
+.lgl-hero-checkitem-sub{ font-size:11px; color:var(--faint); }
+
+/* ---- Party Bonds / Gods Followed display ---- */
+.lgl-hero-links-row{ display:flex; flex-direction:column; gap:20px; margin:22px 0; }
+.lgl-hero-linkgroup-label{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--hero-color); font-weight:700; text-align:center; margin-bottom:10px; }
 .lgl-hero-edit-label input:focus, .lgl-hero-edit-label select:focus, .lgl-hero-edit-label textarea:focus{ outline:none; border-color:var(--accent); }
 
 .lgl-avatar-upload{ display:flex; flex-direction:column; align-items:center; gap:10px; }
