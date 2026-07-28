@@ -105,15 +105,21 @@ async function supaFetch(path, opts = {}) {
 const HERO_BUCKET = "hero-portraits";
 const HERO_IMAGE_MAX_MB = 5;
 
+const EXT_TO_MIME = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml", bmp: "image/bmp" };
+
 async function supaStorageUpload(bucket, file) {
   const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
   const key = `${(crypto.randomUUID?.() || Math.random().toString(36).slice(2))}.${ext}`;
+  // Chrome's Opaque Response Blocking rejects cross-origin <img> loads whose
+  // Content-Type doesn't clearly say "image" — file.type is sometimes blank
+  // or generic depending on the browser/OS, so never trust it blindly.
+  const contentType = (file.type && file.type.startsWith("image/")) ? file.type : (EXT_TO_MIME[ext] || "image/png");
   const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${key}`, {
     method: "POST",
     headers: {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      "Content-Type": file.type || "application/octet-stream",
+      "Content-Type": contentType,
     },
     body: file,
   });
@@ -2633,7 +2639,7 @@ function AvatarUpload({ value, onChange }) {
 
   return (
     <div className="lgl-avatar-upload">
-      {preview ? <img src={preview} alt="" className="lgl-avatar-preview" /> : <div className="lgl-avatar-preview lgl-avatar-empty"><UserPlus size={28} /></div>}
+      {preview ? <img src={preview} alt="" className="lgl-avatar-preview" crossOrigin="anonymous" /> : <div className="lgl-avatar-preview lgl-avatar-empty"><UserPlus size={28} /></div>}
       <div className="lgl-avatar-upload-controls">
         <button type="button" className="lgl-avatar-btn" onClick={() => inputRef.current?.click()} disabled={!SUPABASE_READY}>
           {value ? "Change Portrait" : "Upload Portrait"}
@@ -2942,7 +2948,7 @@ function HeroDetailPage({ hero, allHeroes, onBack, onSaved, onOpenHero }) {
         <>
           <header className="lgl-entry-head">
             {avatarUrl
-              ? <img src={avatarUrl} alt={heroName} className="lgl-hero-avatar-real" />
+              ? <img src={avatarUrl} alt={heroName} className="lgl-hero-avatar-real" crossOrigin="anonymous" />
               : <div className="lgl-hero-avatar-real lgl-hero-avatar-real-empty" aria-hidden="true"><UserPlus size={40} /></div>}
             <h1>{heroName || "Unnamed Hero"}</h1>
             {(raceText || classText) && <p className="lgl-hero-raceclass">{[raceText, classText].filter(Boolean).join(" · ")}</p>}
@@ -3061,7 +3067,7 @@ function HeroesModule() {
                 {rows.map((h) => (
                   <button key={h.id} className="lgl-herocard" style={{ "--hero-color": h.color || "var(--accent)" }} onClick={() => setOpenId(h.id)}>
                     {h.avatar_url
-                      ? <img src={h.avatar_url} alt="" className="lgl-herocard-img" />
+                      ? <img src={h.avatar_url} alt="" className="lgl-herocard-img" crossOrigin="anonymous" />
                       : <div className="lgl-herocard-img lgl-herocard-img-empty"><UserPlus size={26} /></div>}
                     <div className="lgl-herocard-name">{h.hero_name || "Unnamed Hero"}</div>
                     <div className="lgl-herocard-player">played by {h.player_name || "someone"}</div>
