@@ -2000,14 +2000,24 @@ function ModuleShell({ aside, asideTitle, children, asideCollapsed, defaultAside
   );
 }
 
-function Facts({ facts }) {
+function Facts({ facts, onEditFact }) {
   if (!facts?.length) return null;
   return (
     <div className="lgl-facts">
-      {facts.map((f) => (
+      {facts.map((f, i) => (
         <div className="lgl-fact" key={f.label}>
-          <div className="lgl-fact-label">{f.label}</div>
-          <div className="lgl-fact-value">{f.chips ? f.chips.map((c) => <span className="lgl-fchip" key={c}>{c}</span>) : f.text}</div>
+          <div className="lgl-fact-label">
+            {onEditFact
+              ? <DevEditableInline value={f.label} onSave={(t) => onEditFact(i, "label", t)} />
+              : f.label}
+          </div>
+          <div className="lgl-fact-value">
+            {f.chips
+              ? f.chips.map((c) => <span className="lgl-fchip" key={c}>{c}</span>)
+              : (onEditFact
+                  ? <DevEditableInline value={f.text} onSave={(t) => onEditFact(i, "text", t)} />
+                  : f.text)}
+          </div>
         </div>
       ))}
     </div>
@@ -2279,12 +2289,13 @@ function EntryPage({ entry: rawEntry, hideLegacy, hideSubraces, hideArt, onOpenE
   const saveTagline = (t) => updateEdit(entry.id, (cur) => ({ ...cur, tagline: t }));
   const saveSecH = (i, t) => updateEdit(entry.id, (cur) => ({ ...cur, sections: { ...cur.sections, [i]: { ...cur.sections?.[i], h: t } } }));
   const saveSecP = (i, j, t) => updateEdit(entry.id, (cur) => ({ ...cur, sections: { ...cur.sections, [i]: { ...cur.sections?.[i], p: { ...cur.sections?.[i]?.p, [j]: t } } } }));
+  const saveFact = (i, field, t) => updateEdit(entry.id, (cur) => ({ ...cur, facts: { ...cur.facts, [i]: { ...cur.facts?.[i], [field]: t } } }));
   const isRace = CONTENT.races.some((r) => r.id === entry.id);
   const hasMechanics = entry.facts?.length > 0 || entry.builtins?.length > 0 || entry.legacy?.length > 0 || (!entry.subracesElsewhere && entry.subraces?.length > 0);
 
   const mechanicsBody = (
     <>
-      <Facts facts={entry.facts} />
+      <Facts facts={entry.facts} onEditFact={saveFact} />
       {entry.builtins?.length > 0 && (
         <section className="lgl-block"><h2 className="lgl-h2">Built-in Features</h2><TraitList items={entry.builtins} sourceLabel="Built-in" /></section>
       )}
@@ -2317,7 +2328,7 @@ function EntryPage({ entry: rawEntry, hideLegacy, hideSubraces, hideArt, onOpenE
         {entry.tagline && <DevEditable as="p" className="lgl-tagline" value={entry.tagline} onSave={saveTagline} />}
       </header>
       {!hideArt && <EntryArt src={entry.img} alt={entry.name} />}
-      {!isRace && <Facts facts={entry.facts} />}
+      {!isRace && <Facts facts={entry.facts} onEditFact={saveFact} />}
       {entry.godmarked && (
         <section className="lgl-gmintro">
           <div className="lgl-gmintro-label"><span className="lgl-orn-rule" /><span>The Godmarked</span><span className="lgl-orn-rule" /></div>
@@ -5746,6 +5757,7 @@ const HOME_CARDS = [
 const HOME_FEATURE = { key: "builder", label: "Character Builder", icon: UserPlus, desc: "Build a character from race to final details, eight steps, your way." };
 
 function HomeModule({ navigate }) {
+  const { devMode, toggleDevMode } = useContext(DevModeContext) || {};
   return (
     <div className="lgl-home">
       <div className="lgl-home-hero">
@@ -5768,6 +5780,11 @@ function HomeModule({ navigate }) {
           <span className="lgl-home-feature-label">{HOME_FEATURE.label}</span>
           <span className="lgl-home-feature-desc">{HOME_FEATURE.desc}</span>
           <span className="lgl-home-feature-go">Enter <ChevronRight size={15} /></span>
+        </button>
+      </div>
+      <div className="lgl-home-devrow">
+        <button className={"lgl-home-devbtn" + (devMode ? " is-on" : "")} onClick={toggleDevMode}>
+          <Wrench size={14} /> {devMode ? "Dev Mode: On" : "Dev Mode"}
         </button>
       </div>
     </div>
@@ -5799,23 +5816,32 @@ const GM_UNLOCK_KEY = "lgl-gm-unlocked-v1";
 const GMAccessContext = createContext(null);
 
 /* ============================================ DEV MODE ===================== */
-/* Lets you edit Codex prose right on the page. Edits save to this browser's
-   localStorage only — they never touch the source file, so use "Export
-   Edits" to hand the JSON back for folding into the real data. */
-const DEV_EDITS_KEY = "lgl-dev-edits-v1";
-const DEV_MODE_KEY = "lgl-dev-mode-v1";
+/* Live content editing. Edits are stored in Supabase (table `content_edits`),
+   so a change made here is immediately live for everyone — no redeploy, no
+   code change. This is non-destructive: the original text stays in CONTENT
+   below, and the saved override is layered on top at render time, so
+   clearing an override always restores the original.
 
-function loadDevEdits() {
-  try { return JSON.parse(localStorage.getItem(DEV_EDITS_KEY) || "{}"); } catch { return {}; }
-}
-function saveDevEdits(edits) {
-  try { localStorage.setItem(DEV_EDITS_KEY, JSON.stringify(edits)); } catch {}
-}
+   Requires the GM password (same lock as the spoiler sections).
+
+   Supabase table to create (SQL editor):
+     create table content_edits (
+       entry_id text primary key,
+       patch jsonb not null,
+       updated_at timestamptz default now()
+     );
+     alter table content_edits enable row level security;
+     create policy "public read" on content_edits for select using (true);
+     create policy "public insert" on content_edits for insert with check (true);
+     create policy "public update" on content_edits for update using (true);
+     create policy "public delete" on content_edits for delete using (true);
+   ========================================================================== */
+const DEV_MODE_KEY = "lgl-dev-mode-v1";
 
 const DevModeContext = createContext(null);
 
-/* Applies this browser's saved edits over an entry's lore text at render
-   time. Never mutates CONTENT — always non-destructive and reversible. */
+/* Applies saved overrides over an entry at render time. Never mutates
+   CONTENT — always non-destructive and reversible. */
 function applyDevEdits(entry, edits) {
   if (!entry) return entry;
   const e = edits[entry.id];
@@ -5824,6 +5850,11 @@ function applyDevEdits(entry, edits) {
     ...entry,
     lore: e.lore !== undefined ? e.lore : entry.lore,
     tagline: e.tagline !== undefined ? e.tagline : entry.tagline,
+    facts: entry.facts?.map((f, i) => {
+      const fe = e.facts?.[i];
+      if (!fe) return f;
+      return { ...f, label: fe.label !== undefined ? fe.label : f.label, text: fe.text !== undefined ? fe.text : f.text };
+    }),
     loreSections: entry.loreSections?.map((sec, i) => {
       const se = e.sections?.[i];
       if (!se) return sec;
@@ -5837,7 +5868,7 @@ function applyDevEdits(entry, edits) {
 }
 
 /* A piece of text that becomes contentEditable when Dev Mode is on. Saves
-   to the Dev Mode context on blur, so typing never triggers a re-render. */
+   on blur, so typing never triggers a re-render. */
 function DevEditable({ as: Tag = "p", value, onSave, className }) {
   const { devMode } = useContext(DevModeContext) || {};
   if (!devMode) return <Tag className={className}>{parseLore(value)}</Tag>;
@@ -5857,22 +5888,87 @@ function DevEditable({ as: Tag = "p", value, onSave, className }) {
   );
 }
 
+/* Same idea, but for short single-line values (fact text/labels) that
+   shouldn't run through parseLore or wrap in a block element. */
+function DevEditableInline({ value, onSave, className }) {
+  const { devMode } = useContext(DevModeContext) || {};
+  if (!devMode) return <span className={className}>{value}</span>;
+  return (
+    <span
+      className={(className || "") + " lgl-dev-editable"}
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={(e) => {
+        const t = e.currentTarget.textContent;
+        if (t !== value) onSave(t);
+      }}
+    >
+      {value}
+    </span>
+  );
+}
+
 function DevModeProvider({ children }) {
+  const { unlocked } = useContext(GMAccessContext) || {};
   const [devMode, setDevMode] = useState(() => { try { return localStorage.getItem(DEV_MODE_KEY) === "1"; } catch { return false; } });
-  const [edits, setEdits] = useState(() => loadDevEdits());
+  const [edits, setEdits] = useState({});
+  const [loadState, setLoadState] = useState("idle"); // idle | loading | done | error
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
   const [history, setHistory] = useState([]); // stack of previous `edits` snapshots, for Undo
   const [confirmingReset, setConfirmingReset] = useState(false);
-  const toggleDevMode = () => setDevMode((d) => { const next = !d; try { localStorage.setItem(DEV_MODE_KEY, next ? "1" : "0"); } catch {} return next; });
+  const [showPw, setShowPw] = useState(false);
+
+  /* Overrides load for EVERYONE, not just editors — that's what makes an
+     edit actually go live rather than being a local-only preview. */
+  useEffect(() => {
+    if (!SUPABASE_READY) { setLoadState("error"); return; }
+    setLoadState("loading");
+    supaFetch("content_edits?select=entry_id,patch")
+      .then((rows) => {
+        const map = {};
+        (rows || []).forEach((r) => { map[r.entry_id] = r.patch; });
+        setEdits(map);
+        setLoadState("done");
+      })
+      .catch(() => setLoadState("error"));
+  }, []);
+
+  const toggleDevMode = () => {
+    if (!unlocked) { setShowPw(true); return; }
+    setDevMode((d) => { const next = !d; try { localStorage.setItem(DEV_MODE_KEY, next ? "1" : "0"); } catch {} return next; });
+  };
+
+  const persist = async (entryId, patch) => {
+    setSaveState("saving");
+    try {
+      if (patch && Object.keys(patch).length > 0) {
+        await supaFetch("content_edits", {
+          method: "POST",
+          headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+          body: JSON.stringify({ entry_id: entryId, patch, updated_at: new Date().toISOString() }),
+        });
+      } else {
+        await supaFetch(`content_edits?entry_id=eq.${encodeURIComponent(entryId)}`, { method: "DELETE" });
+      }
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 1500);
+    } catch {
+      setSaveState("error");
+    }
+  };
 
   const updateEdit = (entryId, updater) => {
     setEdits((prev) => {
       setHistory((h) => [...h, prev].slice(-25)); // cap history so it can't grow unbounded
-      const merged = { ...prev, [entryId]: updater(prev[entryId] || {}) };
-      saveDevEdits(merged);
+      const nextPatch = updater(prev[entryId] || {});
+      const merged = { ...prev, [entryId]: nextPatch };
+      persist(entryId, nextPatch);
       return merged;
     });
   };
+
   const editCount = Object.keys(edits).length;
+
   const exportEdits = () => {
     const blob = new Blob([JSON.stringify(edits, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -5881,34 +5977,57 @@ function DevModeProvider({ children }) {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
   /* window.confirm() is blocked in some sandboxed previews, so Reset All
      confirms inline in the bar instead of using a browser dialog. */
-  const requestReset = () => {
+  const requestReset = async () => {
     if (!confirmingReset) { setConfirmingReset(true); return; }
     setHistory((h) => [...h, edits].slice(-25));
-    setEdits({}); saveDevEdits({});
+    const ids = Object.keys(edits);
+    setEdits({});
     setConfirmingReset(false);
+    setSaveState("saving");
+    try {
+      await Promise.all(ids.map((id) => supaFetch(`content_edits?entry_id=eq.${encodeURIComponent(id)}`, { method: "DELETE" })));
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 1500);
+    } catch { setSaveState("error"); }
   };
+
   const undo = () => {
     setHistory((h) => {
       if (!h.length) return h;
       const prevState = h[h.length - 1];
       setEdits(prevState);
-      saveDevEdits(prevState);
+      // Re-persist every entry that differs, so the undo also goes live.
+      const ids = new Set([...Object.keys(prevState), ...Object.keys(edits)]);
+      ids.forEach((id) => {
+        if (JSON.stringify(prevState[id]) !== JSON.stringify(edits[id])) persist(id, prevState[id]);
+      });
       return h.slice(0, -1);
     });
     setConfirmingReset(false);
   };
+
   return (
-    <DevModeContext.Provider value={{ devMode, edits, updateEdit }}>
+    <DevModeContext.Provider value={{ devMode, edits, updateEdit, toggleDevMode }}>
       {children}
-      <button className={"lgl-devfab" + (devMode ? " is-on" : "")} onClick={toggleDevMode} title={devMode ? "Turn off Dev Mode" : "Turn on Dev Mode"}>
-        <Wrench size={17} />
-      </button>
-      {devMode && (
+      {showPw && !unlocked && (
         <div className="lgl-devbar">
-          <span className="lgl-devbar-dot" /> Dev Mode — click any lore text to edit. Saves to this browser only.
+          <Lock size={13} /> Dev Mode needs the GM password — unlock any “Behind the Screen” section first.
+          <button className="lgl-devbar-btn" onClick={() => setShowPw(false)}>OK</button>
+        </div>
+      )}
+      {devMode && unlocked && (
+        <div className="lgl-devbar">
+          <span className="lgl-devbar-dot" />
+          {loadState === "error"
+            ? "Dev Mode — can't reach the database, edits won't save."
+            : "Dev Mode — click any lore text or fact to edit. Saves live for everyone."}
           {editCount > 0 && <span className="lgl-devbar-count">{editCount} entr{editCount === 1 ? "y" : "ies"} edited</span>}
+          {saveState === "saving" && <span className="lgl-devbar-count">Saving…</span>}
+          {saveState === "saved" && <span className="lgl-devbar-count">Saved ✓</span>}
+          {saveState === "error" && <span className="lgl-devbar-count is-warn">Save failed</span>}
           <button className="lgl-devbar-btn" onClick={exportEdits} disabled={editCount === 0}>Export Edits</button>
           <button className="lgl-devbar-btn" onClick={undo} disabled={history.length === 0} title="Undo the last change">Undo</button>
           <button className={"lgl-devbar-btn is-danger" + (confirmingReset ? " is-confirming" : "")} onClick={requestReset} onMouseLeave={() => setConfirmingReset(false)} disabled={editCount === 0}>
@@ -6506,12 +6625,14 @@ body{ display:block; place-items:unset; }
 .lgl-aside-wrap::-webkit-scrollbar-thumb{ background:rgba(120,112,100,.5); border-radius:8px; }
 
 /* ---- Dev Mode ---- */
-.lgl-devfab{ position:fixed; right:20px; bottom:20px; z-index:60; display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--faint); cursor:pointer; box-shadow:0 8px 26px -10px rgba(0,0,0,.6); transition:border-color .15s, color .15s, background .15s, transform .15s; }
-.lgl-devfab:hover{ transform:translateY(-2px); border-color:var(--accent); color:var(--accent); }
-.lgl-devfab.is-on{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+.lgl-home-devrow{ display:flex; justify-content:center; margin:30px 0 10px; }
+.lgl-home-devbtn{ display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--mid); cursor:pointer; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; transition:border-color .15s, color .15s, background .15s, transform .15s; }
+.lgl-home-devbtn:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-2px); }
+.lgl-home-devbtn.is-on{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
 .lgl-devbar{ position:fixed; left:50%; transform:translateX(-50%); bottom:20px; z-index:59; display:flex; align-items:center; gap:12px; padding:10px 18px; border-radius:999px; border:1px solid rgba(200,168,107,.45); background:#141416; color:var(--mid); font-size:12.5px; box-shadow:0 10px 30px -10px rgba(0,0,0,.7); }
 .lgl-devbar-dot{ width:7px; height:7px; border-radius:999px; background:#e0574f; flex:0 0 auto; animation:lgl-pulse 1.6s ease-in-out infinite; }
 .lgl-devbar-count{ font-size:11px; color:var(--accent); letter-spacing:.04em; }
+.lgl-devbar-count.is-warn{ color:#e0574f; }
 .lgl-devbar-btn{ background:none; border:1px solid var(--line); border-radius:999px; padding:5px 13px; cursor:pointer; color:var(--hi); font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; }
 .lgl-devbar-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
 .lgl-devbar-btn:disabled{ opacity:.35; cursor:default; }
