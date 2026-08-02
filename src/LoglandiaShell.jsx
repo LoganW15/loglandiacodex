@@ -1174,10 +1174,7 @@ const CONTENT = {
       img: "/images/lucan.png",
       tagline: "\"the Dawn Feather\"",
       lore: "Lucan never folds his wings away, and hunters half a head taller than him still stand up when he walks past. Meet him once and he has your name for good, along with the town you rode in from and the drink you ordered. New hunters keep looking for the catch in all that warmth. The old ones could tell them there isn't one.",
-      facts: [
-        { label: "Theme", text: "The Dawn. The light people steer home by." },
-        { label: "Location", text: "The Gilded Feather, in the heart of Kingsmont — a bar downstairs, a hall of contracts and hunt-trophies above, bunks under the rafters. Headquarters of the Dawn Hunt." },
-      ],
+      facts: [ { label: "Race", text: "Lighttouched, godmarked by Solucant." }, { label: "Class", text: "Fighter" }, { label: "Currently", text: "The Gilded Feather, in the heart of Kingsmont — a bar downstairs, a hall of contracts and hunt-trophies above, bunks under the rafters. Headquarters of the Dawn Hunt." } ],
       gmNotes: [
         { label: "Want", text: "To go back out the door. He built the safe, warm, wonderful thing, and he loves it, and every time a road-dirty party walks in with a real hunt on them, something in him leans toward the door. He misses the sky. He's looking, quietly, for a reason good enough to strap it all back on." },
         { label: "Knife", text: "Icarus, grounded. One wing is chipped and half-bandaged, and it has been for years. That injury took him off the road for good and turned the best hunter in Kingsmont into the man who sends others out to do it. It doesn't haunt him. He's happy. But the ache is real and human. He flew too near the thing that broke him once, came home, and now lives the sky through the stories hunters carry back to his bar. Give him the right hunt and too much nostalgia and he will find an excuse to fly again, and he probably shouldn't." },
@@ -1190,12 +1187,7 @@ const CONTENT = {
       img: "/images/emrin.png",
       tagline: "\"the Feather's Ledger\"",
       lore: "Emrin has his father's wings. On him they mostly get in the way of the desk. He runs the boards Lucan is too warm to run himself, and if a contract's pay is wrong, he's the one who tells you, without softening it. Hunters come to like him slower than they like Lucan, and trust him faster: Lucan tells you the hunt will go fine, Emrin tells you what it pays and what it's killed before.",
-      facts: [
-        { label: "Theme", text: "The Ledger. Where his father is the open sky, Emrin is the ink that keeps the Hunt aloft." },
-        { label: "Class", text: "Sorcerer, Lighttouched bloodline — the same mark as his father's, mostly unused, mostly in the way." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Behind the contracts desk at the Gilded Feather, in Kingsmont." },
-      ],
+      facts: [ { label: "Race", text: "Lighttouched, godmarked by Solucant." }, { label: "Class", text: "Sorcerer" }, { label: "Currently", text: "Behind the contracts desk at the Gilded Feather, in Kingsmont." } ],
       gmNotes: [
         { label: "Want", text: "To keep his father alive and the Hunt solvent, in that order. Everything else is a column that has to balance." },
         { label: "Knife", text: "He's the anchor by choice, and it costs him. Emrin could be a hunter. He has the wings, the blood, the name that would open any door in the Dawn Hunt. Instead he took the desk, because someone has to be the reason Lucan doesn't fly, and he decided years ago it would be him. He doesn't resent it. But he watches parties ride out toward the thing he keeps his father from, does the sums on who's likely to come back, and goes back to the ledger. The one time he leaves the desk himself, the question follows him out the door: who's watching Lucan while he isn't." },
@@ -1208,12 +1200,7 @@ const CONTENT = {
       img: "/images/tatsumi.png",
       tagline: "\"the Bolt of Shirokane\"",
       lore: "Every child in Shirokane grows up worshipping Meirlach the Dragon Master. Only his followers call him Musashi, and Tatsumi has never once called him anything else. The other children worshipped and grew out of it. She imitated him, studied his swordsmanship, and never stopped. Her father is a blue Drakel who carried messages between Shirokane and Vaelrath, the dragon plane, and from him she gets her innate speed and the small stock of manners she has. She is young and loud, and she bows very correctly before she asks the biggest man in the room for a sparring match. Then, before you have registered that it began, she is across the floor and cutting at you.",
-      facts: [
-        { label: "Theme", text: "Lightning." },
-        { label: "Class", text: "Sword Saint, Way of Musashi." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Wherever the next good blade is. She left Shirokane on purpose." },
-      ],
+      facts: [ { label: "Race", text: "Half Drakel, half Human." }, { label: "Class", text: "Sword Saint" }, { label: "Currently", text: "Wherever the next good blade is. She left Shirokane on purpose." } ],
       gmNotes: [
         { label: "Want", text: "To be fast enough, and to find her god's swords. Not faster than you. Fast enough." },
         { label: "Quest", text: "Temper and Patience, the ancient swords of Musashi. A matched pair, long lost, and she intends to carry both. Everything else she does serves this. She walks into ruins nobody has opened in an age, buys drinks for scholars, copies temple inscriptions she can barely read, and asks every stranger on every road whether they have heard the names. She is chasing two blades named for the only two virtues she does not have, and this has not occurred to her once." },
@@ -1227,12 +1214,7 @@ const CONTENT = {
       img: "/images/mylo.png",
       tagline: "\"the Sun Blooded\"",
       lore: "He comes in unhurried, grinning, already sure the day is going to go his way. Red hair, one eye, a chest full of scars, and he will tell you the story behind any of them, though the stories get better every year. When the crowds call him kin to the great Sun Elf general he just laughs. He is obviously human. It has never once hurt ticket sales.",
-      facts: [
-        { label: "Theme", text: "The Sun." },
-        { label: "Class", text: "Fighter — a lance since his first day in the pits, never seriously picked up anything else." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Pyrra, the colosseum city, where the Sun Elf love of the fight became an industry." },
-      ],
+      facts: [ { label: "Race", text: "Human." }, { label: "Class", text: "Fighter" }, { label: "Currently", text: "Pyrra, the colosseum city, where the Sun Elf love of the fight became an industry." } ],
       gmNotes: [
         { label: "Want", text: "A real war. He has been the best in Pyrra long enough that winning stopped feeling like anything, and he wants to matter somewhere the stakes don't reset at the next festival. He'd tell you it's for glory. Some of it is for Mortuous." },
         { label: "Knife", text: "Nobody fights him anymore. Not really. The good challengers find reasons to be elsewhere, the promoters manage his bouts like theater, and the bookmakers quit taking bets on him years ago. So when something that smells like a real war finally comes through Pyrra, he is going to say yes before he asks what it costs." },
@@ -1249,12 +1231,7 @@ const CONTENT = {
       img: "/images/amenza.png",
       tagline: "\"the Grasping\" — a name she took for herself, not one anyone gave her",
       lore: "She keeps the lower half of her face veiled, and most people never learn the rest. Silver hair, light purple eyes, a spiked chain coiled somewhere in reach. She is courteous, quiet, and forgettable on purpose. It slips in two places. Near anything gilded, a noble's carriage, a temple door, a rich man's coat, the envy shows in her eyes before she can school them. And she moves like a dancer whether she means to or not. On the rare night she lets herself dance, strangers stop to watch.",
-      facts: [
-        { label: "Theme", text: "Envy. What she was never given." },
-        { label: "Class", text: "Favored Soul of Invidiva. (Tier 4 in the divine framework — the first Character Book entry who's a mechanically real Champion, not just a devotee.)" },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Kingsmont, out at the ragged edge where the lamplight gives out. She does not keep a room anyone can find twice." },
-      ],
+      facts: [ { label: "Race", text: "Human." }, { label: "Class", text: "Favored Soul" }, { label: "Currently", text: "Kingsmont, out at the ragged edge where the lamplight gives out. She does not keep a room anyone can find twice." } ],
       gmNotes: [
         { label: "Want", text: "To be strong. Not for its own sake. Strong enough that Perrin, Prince of Kingsmont, cannot look past her the second time." },
         { label: "Knife", text: "Her mother ran a room in a brothel and kept two daughters in it for less than a week. Perrin came himself, killed her mother with his own hand, and carried off one infant to pass as his dead wife's child. He did not think the other worth killing. He simply left. Amenza grew up in the same brothel that buried her mother, on scraps and the goodwill of a madam who owed her nothing, and did not learn any of this until she was eighteen. She has had two years to turn that knowledge into something with an edge." },
@@ -1267,10 +1244,7 @@ const CONTENT = {
       img: "/images/amariel.png",
       tagline: "\"the beloved of Kingsmont\"",
       lore: "Amariel enters a room and the room reorganizes around her without seeming to notice it's done so. Warm and open-faced, nothing veiled about her at all. Her hair is court black from a bottle, and between sittings with the dye, the roots come in red. She remembers everyone's name, touches an arm when she says it, and men who have served the crown thirty years catch themselves hoping she remembers them fondly. When there's a ball she dances until the musicians tire first. She is exactly as warm as she seems, and that is the unsettling part.",
-      facts: [
-        { label: "Theme", text: "Lust. What everyone wants and cannot quite have." },
-        { label: "Location", text: "The palace at Kingsmont. Third in line, unmarried, and the whole court quietly expects that to be decided for her rather than by her." },
-      ],
+      facts: [ { label: "Race", text: "Human." }, { label: "Class", text: "Favored Soul" }, { label: "Currently", text: "The palace at Kingsmont. Third in line, unmarried, and the whole court quietly expects that to be decided for her rather than by her." } ],
       gmNotes: [
         { label: "Want", text: "To be loved past the point of reason, by everyone, always. Not vanity. Instinct. She has never once had to ask for loyalty and doesn't fully know that's strange." },
         { label: "Knife", text: "She believes she is the trueborn daughter of a dead queen. She is not. Her father murdered a woman in a brothel to take her, and told a grieving kingdom his wife had died bearing a second, unrecorded child. Amariel has never doubted a word of it. She does not know she has a twin. She does not know her real mother's name." },
@@ -1283,13 +1257,7 @@ const CONTENT = {
       img: "/images/setsariel.png",
       tagline: "\"Setsu\" — the formal name is his mother's; everyone who likes him shortens it",
       lore: "Setsu is tall, lanky, and forever apologizing for things that need no apology. Strangers see the white fox ears, the three tails, and decide he is a Byakko, an omen made flesh, and he has spent his whole life gently explaining that he cannot read anyone's future, his mother is simply an elf from the snow country. He answers questions in a soft, precise voice, knows more than he ever volunteers, and given a quiet hour will fold himself into fox form beside the fire with a book propped against his own tails.",
-      facts: [
-        { label: "Theme", text: "Winter. Frost creeping across lantern glass while he reads a map he already knows is wrong." },
-        { label: "Race", text: "Kitsune, Snow Elf mother. White-furred, and mistaken for a Byakko omen-fox roughly weekly." },
-        { label: "Class", text: "Wizard, journeyman-candidate of the mage college in the north." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Kingsmont, mostly the library. Otherwise the Gilded Feather, at whichever table has the best lamp." },
-      ],
+      facts: [ { label: "Race", text: "Half Kitsune, half Snow Elf." }, { label: "Class", text: "Wizard" }, { label: "Currently", text: "Kingsmont, mostly the library. Otherwise the Gilded Feather, at whichever table has the best lamp." } ],
       gmNotes: [
         { label: "Want", text: "To finish the search without ending it. He came south to graduate. He stays south because stopping means the last thread to the burned homeland goes cold." },
         { label: "Hook", text: "The graduation trial. The college graduates no one on examinations alone; the final trial is a retrieval, one lost thing somewhere in the world, come back with it or come back nothing. Knowing his obsession, the college assigned him something that survived the Akimori calamity and made its way south. The errand should have taken a month. It has taken most of a year. He no longer entirely wants to graduate, because graduating means the search ends. (What the object is: open.)" },
@@ -1303,13 +1271,7 @@ const CONTENT = {
       img: "/images/ferrin.png",
       tagline: "the coast calls him Salt-Tongue, and he's never once corrected them",
       lore: "Ferrin leans before he stands, unhurried in a way that makes everyone around him relax without noticing they've done it. He tells you a story and you believe you talked him into it. Ask what the tattoo across his chest means and the ease slips for exactly one second before he finds it again and changes the subject with a joke you'll repeat for a week. He has never once made you a promise. He has also never once lied to you. Working out which is happening in any given conversation is most of his charm.",
-      facts: [
-        { label: "Theme", text: "The chill of the tide. Calm water, easy going, the sea at rest." },
-        { label: "Race", text: "Sea Elf. Slate-blue skin deepening to teal at the temples, dark malachite-green hair, a scar through one eyebrow he's never explained." },
-        { label: "Class", text: "Bard, College of Eloquence." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Wherever the harbor gossip is best. He works the coast in loose circuits, a season here, a season there, never far from moored ships." },
-      ],
+      facts: [ { label: "Race", text: "Sea Elf." }, { label: "Class", text: "Bard" }, { label: "Currently", text: "Wherever the harbor gossip is best. He works the coast in loose circuits, a season here, a season there, never far from moored ships." } ],
       gmNotes: [
         { label: "Want", text: "Crew, favor, and power enough to take one piece of Ilsrabae's hoard out of the Black Drain and walk away with it. Not revenge. Proof. His faith says the tide can be steadied. He intends to steal the argument out of her own vault." },
         { label: "Knife", text: "The tattoo across his chest went in the day a water elemental Ilsrabae failed to leash killed a Kua Hono friend of his, and the rest of the crew with him. He had it inked the Kua Hono way, the way they mark loss and deed both. He built a heist out of it instead of sitting still with the grief." },
@@ -1322,13 +1284,7 @@ const CONTENT = {
       img: "/images/duro.png",
       tagline: "\"the Blazing Berserker\"",
       lore: "Duro is big, warm, and not the sharpest man in any room, and it has never once bothered him. He solves most problems with his hands and the rest with a grin. He carries one thing besides himself: a small blackened cold-iron kettle, the one material his fire respects, and making tea on his own palm is the first trick he shows anyone new. Loves fire the way sailors love the sea. Loves a good fight the same way. Loves people almost as much as both.",
-      facts: [
-        { label: "Theme", text: "The banked coal. Warm even standing still." },
-        { label: "Race", text: "Fire Primordia. Ash-gray skin, ember-orange cracks glowing constantly at low simmer along the knuckles, jaw, and joints. Hair the color of low flame." },
-        { label: "Class", text: "Barbarian, unarmed grappler." },
-        { label: "Adventurer", text: "Yes" },
-        { label: "Location", text: "Pyrra, more often than not. Sleeps outdoors on stone by preference." },
-      ],
+      facts: [ { label: "Race", text: "Fire Primordia." }, { label: "Class", text: "Barbarian" }, { label: "Currently", text: "Pyrra, more often than not. Sleeps outdoors on stone by preference." } ],
       gmNotes: [
         { label: "Hook", text: "He's on the road because the road is fun, plainly, and because he's burned exactly one bed in his life and word travels faster than he does. Nobody's ever run him out of anywhere out of malice. He's just expensive to house." },
         { label: "Quirk", text: "Sleeps outdoors on stone by preference." },
